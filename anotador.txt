@@ -1,0 +1,58 @@
+Tengo que poder representar las sgts operaciones:
+- Poder dar:
+  * símbolos (alfabeto) de entrada
+  * símbolos (alfabeto) de pila (pila = entrada + extras)
+  * estados
+  * estados de aceptación (por default sería el primero dado en la lista de estados)
+  * estado inicial
+  * transiciones
+- Ver si el autómata reconoce una palabra
+- ¿cargar archivos?
+
+--------------------------------------------------------------------------------
+Posible sintaxis
+
+Que acepte el lenguaje {x^ny^n / n ϵ N_0} podría representarla mediante el siguiente código:
+
+En archivo:
+
+InputAlph = {x, y}
+StackAlph = {x, y, #}
+States = {s0, s1, s2, s3}
+AccStates = {s3}
+Transitions = {(s0, λ, λ, #, s1), (s1, x, λ, x, s1), (s1, y, x, λ, s2), (s2, y, x, λ, s2), (s2, λ, #, λ, s3)}
+
+En consola:
+
+Run xxxxyyyy
+Run xyyy
+Run aaabbb
+Run xyyxyy
+
+--------------------------------------------------------------------------------
+
+tipos de datos y automata representado en lang.hs
+
+--------------------------------------------------------------------------------
+
+estado
+
+tengo que representar:
+
+- los caracteres restantes a leer de la palabra
+- estado actual en el automata
+- contenido de la pila
+
+--------------------------------------------------------------------------------
+
+evaluación:
+- buscar una forma para hacer backtracking por el no determinismo
+- opción verbose para dar info completa en cada paso
+- elegir si ir siempre con la primera transición posible o una aleatoria 
+
+¿dar opciones interactivas o solo cargar automata desde archivo y reconocer
+palabras en consola?
+
+--------------------------------------------------------------------------------
+
+pretty printer con colores obviamente
