@@ -48,7 +48,9 @@ tengo que representar:
 evaluación:
 - buscar una forma para hacer backtracking por el no determinismo
 - opción verbose para dar info completa en cada paso
-- elegir si ir siempre con la primera transición posible o una aleatoria 
+- elegir si ir siempre con la primera transición posible, una aleatoria o
+recorrer todas las transiciones posibles para ver todos los caminos posibles
+para aceptar una palabra.
 
 ¿dar opciones interactivas o solo cargar automata desde archivo y reconocer
 palabras en consola?
@@ -56,3 +58,10 @@ palabras en consola?
 --------------------------------------------------------------------------------
 
 pretty printer con colores obviamente
+
+--------------------------------------------------------------------------------
+
+idea de Nati, graficar los automatas:
+https://stackoverflow.com/questions/20849893/how-to-plot-a-graph-using-haskell-graphviz
+https://stackoverflow.com/questions/950945/haskell-graph-drawing-on-windows
+https://hackage.haskell.org/package/algebraic-graphs
