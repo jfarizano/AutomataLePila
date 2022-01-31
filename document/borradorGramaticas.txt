@@ -1,13 +1,10 @@
 Abstracta
 
-PROGRAM ::= InputAlph = ALPH
-          | StackAlph = ALPH
-          | States = STATES
-          | AccStates = STATES
-          | InitState = STATE
-          | Transitions = TRANSITIONS
-          | RUN STRING
-
+PDA ::= InputAlph = ALPH;
+        StackAlph = ALPH;
+        States = STATES;
+        AccStates = STATES;
+        Transitions = TRANSITIONS;
 
 ALPH ::= { SYMBOLS } | { }
 

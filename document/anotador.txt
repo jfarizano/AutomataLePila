@@ -22,12 +22,12 @@ States = {s0, s1, s2, s3}
 AccStates = {s3}
 Transitions = {(s0, λ, λ, #, s1), (s1, x, λ, x, s1), (s1, y, x, λ, s2), (s2, y, x, λ, s2), (s2, λ, #, λ, s3)}
 
-En consola:
+En consola si no hay punto y coma (comando), reconoce lo escrito:
 
-Run xxxxyyyy
-Run xyyy
-Run aaabbb
-Run xyyxyy
+xxxxyyyy
+xyyy
+aaabbb
+xyyxyy
 
 --------------------------------------------------------------------------------
 
