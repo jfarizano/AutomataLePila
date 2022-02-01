@@ -22,8 +22,7 @@ import Data.Char
     ')'               { TRParen }
     '{'               { TLBrace }
     '}'               { TRBrace }
-    symbol            { TSymbol $$ }
-    state             { TState $$ }
+    var               { TVar $$ }
 
 %%
 
@@ -39,16 +38,16 @@ alph : '{' symbols '}'  { $2 }
      | '{' '}'          { [] }
 
 symbols :: { Alphabet }
-symbols : symbol             { [$1] }
-        | symbols ',' symbol { $3 : $1 }
+symbols : var             { [checkSymbol $1]}
+        | symbols ',' var { checkSymbol $3 : $1 }
 
 states :: { [State] }
 states : '{' sts '}'  { $2 }
        | '{' '}'      { [] }
 
 sts :: { [State] }
-sts : state         { [$1] }
-    | sts ',' state { $3 : $1 }
+sts : var         { [$1] }
+    | sts ',' var { $3 : $1 }
 
 transitions :: { [Transition] }
 transitions : '{' trns '}'  { $2 }
@@ -59,7 +58,7 @@ trns : transition          { [$1] }
      | trns ',' transition { $3 : $1 }
 
 transition :: { Transition }
-transition : '(' state ',' symbol ',' symbol ',' symbol ',' state ')'  { ($2, $4, $6, $8, $10) }
+transition : '(' var ',' var ',' var ',' var ',' var ')'  { ($2, checkSymbol $4, checkSymbol $6, checkSymbol $8, $10) }
 
 
 {
@@ -79,8 +78,7 @@ data Token = TInputAlph
            | TRParen 
            | TLBrace 
            | TRBrace 
-           | TSymbol Char
-           | TState String
+           | TVar String
            deriving Show
 
 lexer :: String -> [Token]
@@ -101,11 +99,12 @@ lexvar cs = case span isAcceptedSymbol cs of
                 ("States", rest) -> TStates : lexer rest
                 ("AccStates", rest) -> TAccStates : lexer rest
                 ("Transitions", rest) -> TTransitions : lexer rest
-                (var, rest) -> if length var == 1 
-                               then TSymbol (head var) : lexer rest
-                               else TState var : lexer rest
+                (var, rest) -> TVar var : lexer rest
 
 reservedSymbols = "=,;(){}"
 
 isAcceptedSymbol = \c -> (isPrint c) && (not $ (c `elem` reservedSymbols) || (isSpace c) || (isControl c))
+
+checkSymbol :: String -> Char
+checkSymbol xs = if length xs == 1 then head xs else error $ "Invalid symbol " ++ xs ++ ". Give only one char at a time."
 }
