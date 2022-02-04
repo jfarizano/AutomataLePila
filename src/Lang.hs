@@ -11,7 +11,7 @@ type Alphabet = [Symbol]
 
 type State = String
 
--- (Estado actual, simbolo a sacar de la pila, simbolo a leer palabra, simbolo pongo en pila, estado siguiente)
+-- (Estado actual, simbolo a leer palabra, simbolo a sacar de la pila, simbolo pongo en pila, estado siguiente)
 type Transition = (State, Symbol, Symbol, Symbol, State)
 
 data Automaton = PDA { -- Pushdown automaton

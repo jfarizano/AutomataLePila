@@ -54,9 +54,9 @@ repl = do
                             case minput of
                                Nothing -> return ()
                                Just ":q" -> return ()
-                               Just input -> do outputStrLn $ "Input was: " ++ input
+                               Just input -> do outputStrLn $ "La palabra entrada fue: " ++ input
                                                 result <- lift $ evalPDA pda input (head $ states pda) ""
-                                                outputStrLn $ show result
+                                                outputStrLn $ (if result then "La palabra fue aceptada" else "La palabra no fue aceptada")
                                                 loop pda
 
 loadFile :: MonadPDA m => FilePath -> m Automaton
