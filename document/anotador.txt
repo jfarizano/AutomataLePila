@@ -4,10 +4,10 @@ Tengo que poder representar las sgts operaciones:
   * símbolos (alfabeto) de pila (pila = entrada + extras)
   * estados
   * estados de aceptación (por default sería el primero dado en la lista de estados)
-  * estado inicial
+  * ~~estado inicial~ (Ya no, va el primer estado por default)
   * transiciones
 - Ver si el autómata reconoce una palabra
-- ¿cargar archivos?
+- cargar y recargar archivos
 
 --------------------------------------------------------------------------------
 Posible sintaxis
@@ -16,11 +16,11 @@ Que acepte el lenguaje {x^ny^n / n ϵ N_0} podría representarla mediante el sig
 
 En archivo:
 
-InputAlph = {x, y}
-StackAlph = {x, y, #}
-States = {s0, s1, s2, s3}
-AccStates = {s3}
-Transitions = {(s0, λ, λ, #, s1), (s1, x, λ, x, s1), (s1, y, x, λ, s2), (s2, y, x, λ, s2), (s2, λ, #, λ, s3)}
+InputAlph = {x, y};
+StackAlph = {x, y, #};
+States = {s0, s1, s2, s3};
+AccStates = {s0, s3};
+Transitions = {(s0, λ, λ, #, s1), (s1, λ, x, x, s1), (s1, x, y, λ, s2), (s2, x, y, λ, s2), (s2, #, λ, λ, s3)}
 
 En consola si no hay punto y coma (comando), reconoce lo escrito:
 
@@ -52,8 +52,7 @@ evaluación:
 recorrer todas las transiciones posibles para ver todos los caminos posibles
 para aceptar una palabra.
 
-¿dar opciones interactivas o solo cargar automata desde archivo y reconocer
-palabras en consola?
+cargar automata desde archivo y reconocer palabras en consola
 
 --------------------------------------------------------------------------------
 
@@ -65,3 +64,7 @@ idea de Nati, graficar los automatas:
 https://stackoverflow.com/questions/20849893/how-to-plot-a-graph-using-haskell-graphviz
 https://stackoverflow.com/questions/950945/haskell-graph-drawing-on-windows
 https://hackage.haskell.org/package/algebraic-graphs
+
+--------------------------------------------------------------------------------
+
+ver lo de haskeline

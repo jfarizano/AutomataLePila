@@ -1,10 +1,10 @@
 name:                AutomataLePila
 version:             0.1.0.0
-github:              "githubuser/AutomataLePila"
-license:             BSD3
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2022 Author name here"
+github:              "jfarizano/AutomataLePila"
+license:             MIT
+author:              "Juan Ignacio Farizano"
+maintainer:          "juanignaciofarizano at google mail dot com"
+copyright:           "2022 Juan Ignacio Farizano"
 
 extra-source-files:
 - README.md
@@ -17,13 +17,17 @@ extra-source-files:
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/githubuser/AutomataLePila#readme>
+description:         Please see the README on GitHub at <https://github.com/jfarizano/AutomataLePila#readme>
 
 dependencies:
 - base >= 4.7 && < 5
 - array
 - filepath
 - mtl
+- haskeline
+- cmdargs
+- exceptions
+
 
 library:
   source-dirs: src

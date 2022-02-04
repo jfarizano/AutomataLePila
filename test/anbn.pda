@@ -1,5 +1,5 @@
 InputAlph = {x, y};
 StackAlph = {x, y, #};
 States = {s0, s1, s2, s3};
-AccStates = {s3};
-Transitions = {(s0, λ, λ, #, s1), (s1, x, λ, x, s1), (s1, y, x, λ, s2), (s2, y, x, λ, s2), (s2, λ, #, λ, s3)}
+AccStates = {s0, s3};
+Transitions = {(s0, λ, λ, #, s1), (s1, λ, x, x, s1), (s1, x, y, λ, s2), (s2, x, y, λ, s2), (s2, #, λ, λ, s3)}

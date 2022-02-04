@@ -64,6 +64,7 @@ transition : '(' var ',' var ',' var ',' var ',' var ')'  { ($2, checkSymbol $4,
 {
 
 parseError :: [Token] -> a
+parseError [] = error $ "Parse error: empty file"
 parseError xs = error $ "Parse error " ++ (show $ head xs)
 
 data Token = TInputAlph 

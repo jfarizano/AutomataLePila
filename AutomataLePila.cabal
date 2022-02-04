@@ -6,13 +6,13 @@ cabal-version: 1.12
 
 name:           AutomataLePila
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/AutomataLePila#readme>
-homepage:       https://github.com/githubuser/AutomataLePila#readme
-bug-reports:    https://github.com/githubuser/AutomataLePila/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2022 Author name here
-license:        BSD3
+description:    Please see the README on GitHub at <https://github.com/jfarizano/AutomataLePila#readme>
+homepage:       https://github.com/jfarizano/AutomataLePila#readme
+bug-reports:    https://github.com/jfarizano/AutomataLePila/issues
+author:         Juan Ignacio Farizano
+maintainer:     juanignaciofarizano at google mail dot com
+copyright:      2022 Juan Ignacio Farizano
+license:        MIT
 license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
@@ -21,14 +21,14 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/AutomataLePila
+  location: https://github.com/jfarizano/AutomataLePila
 
 library
   exposed-modules:
       Eval
       Global
+      Graphic
       Lang
-      Lib
       Monad
       Parse
       PPrint
@@ -39,7 +39,10 @@ library
   build-depends:
       array
     , base >=4.7 && <5
+    , cmdargs
+    , exceptions
     , filepath
+    , haskeline
     , mtl
   default-language: Haskell2010
 
@@ -54,7 +57,10 @@ executable AutomataLePila-exe
       AutomataLePila
     , array
     , base >=4.7 && <5
+    , cmdargs
+    , exceptions
     , filepath
+    , haskeline
     , mtl
   default-language: Haskell2010
 
@@ -70,6 +76,9 @@ test-suite AutomataLePila-test
       AutomataLePila
     , array
     , base >=4.7 && <5
+    , cmdargs
+    , exceptions
     , filepath
+    , haskeline
     , mtl
   default-language: Haskell2010
