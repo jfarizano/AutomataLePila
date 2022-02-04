@@ -35,6 +35,12 @@ setCheckOrder o = modify (\s -> s {checkOrder = o})
 getCheckOrder :: MonadPDA m => m CheckOrder
 getCheckOrder = gets checkOrder
 
+setActualPDA :: MonadPDA m => Automaton -> m ()
+setActualPDA p = modify (\s -> s {actualPDA = p})
+
+getActualPDA :: MonadPDA m => m Automaton
+getActualPDA = gets actualPDA
+
 printPDA :: MonadPDA m => String -> m ()
 printPDA = liftIO . putStrLn
 

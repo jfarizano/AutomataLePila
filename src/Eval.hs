@@ -1,4 +1,4 @@
-module Eval where
+module Eval ( evalPDA ) where
 
 import Control.Monad ( foldM, mapM )
 import Control.Monad.Trans

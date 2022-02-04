@@ -10,8 +10,6 @@ data Env = Env {
     lastFile :: FilePath,
     checkOrder :: CheckOrder,
     graphic :: Bool,
-    verbose :: Bool
+    verbose :: Bool,
+    actualPDA :: Automaton
 } deriving (Show, Data, Typeable)
-
-initialEnv :: Env
-initialEnv = Env "" FirstGiven False False

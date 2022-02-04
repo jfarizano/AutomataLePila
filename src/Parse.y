@@ -1,8 +1,11 @@
 {
-module Parse where
+module Parse (
+    parsePDA,
+    lexer
+) where
 
 import Lang
-import Data.Char
+import Data.Char ( isPrint, isSpace, isControl )
 }
 
 %name parsePDA

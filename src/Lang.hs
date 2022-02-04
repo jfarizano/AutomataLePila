@@ -2,9 +2,7 @@
 
 module Lang where
 
-
 import System.Console.CmdArgs.Implicit
-
 
 type Symbol = Char
 type Alphabet = [Symbol]
@@ -20,6 +18,6 @@ data Automaton = PDA { -- Pushdown automaton
     states :: [State],
     accStates :: [State],
     transitions :: [Transition]
-} deriving Show
+} deriving (Show, Data, Typeable)
 
 data CheckOrder = FirstGiven | Random deriving (Show, Data, Typeable)
