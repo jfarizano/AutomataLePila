@@ -29,6 +29,7 @@ library
       Global
       Graphic
       Lang
+      Lib
       Monad
       Parse
       PPrint

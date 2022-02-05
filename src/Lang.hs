@@ -9,6 +9,10 @@ type Alphabet = [Symbol]
 
 type State = String
 
+type Stack = [Symbol]
+
+type Step = (String, State, Stack)
+
 -- (Estado actual, simbolo a leer palabra, simbolo a sacar de la pila, simbolo pongo en pila, estado siguiente)
 type Transition = (State, Symbol, Symbol, Symbol, State)
 

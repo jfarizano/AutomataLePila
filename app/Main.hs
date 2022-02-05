@@ -20,6 +20,7 @@ import Global
 import Monad
 import Eval
 import PPrint
+import Lib
 
 opts = Env {
     lastFile = def &= argPos 0 &= typFile &= opt "",
@@ -30,6 +31,7 @@ opts = Env {
   &= summary "Autómata Le Pila, (C) Juan Ignacio Farizano."
   &= program "PDA"
   &= helpArg [help "Muestra esta lista de comandos."]
+  &= details ["Símbolo lambda para tener a mano: λ"]
   &= versionArg [ignore]
 
 main :: IO ()
@@ -121,7 +123,7 @@ handleCommand cmd = do
       Load f        -> (printPDA $ "Abriendo archivo: " ++ f) >> (loadFile f >>= setActualPDA) >> return True
       Eval w        -> do printPDA $ if null w then "La palabra vacía fue entrada." else "La palabra entrada fue: " ++ w
                           pda <- getActualPDA
-                          result <- evalPDA pda w (head $ states pda) ""
+                          result <- evalPDA pda (head $ states pda) w ""
                           printPDA $ (if result then "La palabra fue aceptada." 
                                                 else "La palabra no fue aceptada.")
                           return True
@@ -145,4 +147,4 @@ loadFile f = do
     then failPDA "Archivo vacío/inexistente"
     else case readPDA x of
           Left e -> failPDA e
-          Right pda -> return pda
+          Right pda -> verifyPDA pda
