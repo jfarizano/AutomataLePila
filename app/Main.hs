@@ -123,7 +123,7 @@ handleCommand cmd = do
       Load f        -> (printPDA $ "Abriendo archivo: " ++ f) >> (loadFile f >>= setActualPDA) >> return True
       Eval w        -> do printPDA $ if null w then "La palabra vacía fue entrada." else "La palabra entrada fue: " ++ w
                           pda <- getActualPDA
-                          result <- evalPDA pda (head $ states pda) w ""
+                          result <- evalPDA pda w
                           printPDA $ (if result then "La palabra fue aceptada." 
                                                 else "La palabra no fue aceptada.")
                           return True

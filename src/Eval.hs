@@ -8,21 +8,25 @@ import Global ( Env(..) )
 import Monad
 import PPrint
 
-evalPDA :: MonadPDA m => Automaton -> State -> String -> Stack -> m Bool
-evalPDA au st w sk | null w && st `elem` accStates au = do printVerbose $ "Palabra aceptada en el estado: " ++ st ++ ". Contenido restante de pila: " ++ sk
-                                                           return True
-                   | otherwise = do printVerbose $ "Estado actual: " ++ st ++ ". Palabra a leer: " ++ w ++ ". Contenido de la pila: " ++ sk
-                                    steps <- nextSteps au st w sk
-                                    case steps of
-                                      [] -> do printVerbose $ "No hay pasos siguientes posibles a partir de acá."
-                                               return False
-                                      _ -> do printVerbose $ "Pasos siguientes posibles: " ++ show steps
-                                              go steps -- Para backtracking
-                                              where go [] = do printVerbose $ "No quedaron más pasos, backtrackeando..."
-                                                               return False
-                                                    go ((st', w', sk') : s') = do b <- evalPDA au st' w' sk'
-                                                                                  if b then do return True
-                                                                                       else go s'
+evalPDA :: MonadPDA m => Automaton -> String -> m Bool
+evalPDA au w = evalPDA' au (head $ states au) w ""
+
+evalPDA' :: MonadPDA m => Automaton -> State -> String -> Stack -> m Bool
+evalPDA' au st w sk | null w && st `elem` accStates au = do printVerbose $ "Palabra aceptada en el estado: " ++ st ++ ". Contenido restante de pila: " ++ sk
+                                                            return True
+                    | otherwise = do printVerbose $ "Estado actual: " ++ st ++ ". Palabra a leer: " ++ w ++ ". Contenido de la pila: " ++ sk
+                                     steps <- nextSteps au st w sk
+                                     case steps of
+                                       [] -> do printVerbose $ "No hay pasos siguientes posibles a partir de acá."
+                                                return False
+                                       _ -> do printVerbose $ "Pasos siguientes posibles: " ++ show steps
+                                               go steps -- Para backtracking
+                                               where go [] = do printVerbose $ "No quedaron más pasos, backtrackeando..."
+                                                                return False
+                                                     go ((st', w', sk') : s') = do b <- evalPDA' au st' w' sk'
+                                                                                   if b then do return True
+                                                                                        else do printVerbose $ "Se volvió al estado " ++ show st ++ ". Palabra a leer: " ++ w ++ ". Contenido de la pila: " ++ sk
+                                                                                                go s'
 
 nextSteps :: MonadPDA m => Automaton -> State -> String -> Stack -> m [Step]
 nextSteps au st w sk = do transitions <- possibleTransitions au st w sk
