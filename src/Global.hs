@@ -10,5 +10,6 @@ data Env = Env {
     lastFile :: FilePath,
     graphic :: Bool,
     verbose :: Bool,
-    actualPDA :: Automaton
+    actualPDA :: Automaton,
+    canRunPDA :: Bool
 } deriving (Show, Data, Typeable)

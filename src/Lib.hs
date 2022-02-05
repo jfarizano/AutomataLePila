@@ -4,13 +4,11 @@ import Lang
 import Monad
 import Global
 
-verifyPDA :: MonadPDA m => Automaton -> m Automaton
+verifyPDA :: MonadPDA m => Automaton -> m Bool
 verifyPDA au = do balph <- verifyAlph ialph salph
                   baccs <- verifyAccStates st accSt
                   bt <- verifyTransitions tr st ialph salph
-                  if and [balph, baccs, bt]
-                    then return au
-                    else failPDA "Error: Autómata inválido."
+                  return $ and [balph, baccs, bt]
                where 
                  ialph = inputAlph au
                  salph = stackAlph au

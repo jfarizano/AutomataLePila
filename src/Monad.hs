@@ -35,6 +35,12 @@ setActualPDA p = modify (\s -> s {actualPDA = p})
 getActualPDA :: MonadPDA m => m Automaton
 getActualPDA = gets actualPDA
 
+setCanRunPDA :: MonadPDA m => Bool -> m ()
+setCanRunPDA b = modify (\s -> s {canRunPDA = b})
+
+getCanRunPDA :: MonadPDA m => m Bool
+getCanRunPDA = gets canRunPDA
+
 printPDA :: MonadPDA m => String -> m ()
 printPDA = liftIO . putStrLn
 

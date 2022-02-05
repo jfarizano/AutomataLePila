@@ -1,13 +1,13 @@
 {
 module Parse (
-    readPDA
+    parsePDA
 ) where
 
 import Lang
 import Data.Char ( isPrint, isSpace, isControl )
 }
 
-%name parsePDA
+%name parse_PDA
 %tokentype { Token }
 %monad { P } { thenP } { returnP }
 %lexer { monadicLexer } { TokenEOF }
@@ -67,8 +67,8 @@ transition : '(' var ',' var ',' var ',' var ',' var ')'  {% (buildTransition $2
 
 {
 
-readPDA :: String -> Either String Automaton
-readPDA s = parsePDA s 0
+parsePDA :: String -> Either String Automaton
+parsePDA s = parse_PDA s 0
 
 type P a = String -> Int -> Either String a
 
