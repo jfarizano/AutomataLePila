@@ -19,5 +19,3 @@ data Automaton = PDA { -- Pushdown automaton
     accStates :: [State],
     transitions :: [Transition]
 } deriving (Show, Data, Typeable)
-
-data CheckOrder = FirstGiven | Random deriving (Show, Data, Typeable)

@@ -8,7 +8,6 @@ import Lang
 
 data Env = Env {
     lastFile :: FilePath,
-    checkOrder :: CheckOrder,
     graphic :: Bool,
     verbose :: Bool,
     actualPDA :: Automaton

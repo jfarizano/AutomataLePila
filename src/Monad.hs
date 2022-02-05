@@ -29,12 +29,6 @@ setGraphic b = modify (\s -> s {graphic = b})
 getGraphic :: MonadPDA m => m Bool
 getGraphic = gets graphic
 
-setCheckOrder :: MonadPDA m => CheckOrder -> m ()
-setCheckOrder o = modify (\s -> s {checkOrder = o})
-
-getCheckOrder :: MonadPDA m => m CheckOrder
-getCheckOrder = gets checkOrder
-
 setActualPDA :: MonadPDA m => Automaton -> m ()
 setActualPDA p = modify (\s -> s {actualPDA = p})
 

@@ -1,7 +1,6 @@
 {
 module Parse (
-    parsePDA,
-    lexer
+    readPDA
 ) where
 
 import Lang
@@ -10,6 +9,8 @@ import Data.Char ( isPrint, isSpace, isControl )
 
 %name parsePDA
 %tokentype { Token }
+%monad { P } { thenP } { returnP }
+%lexer { monadicLexer } { TokenEOF }
 %error { parseError }
 
 %token
@@ -41,8 +42,8 @@ alph : '{' symbols '}'  { $2 }
      | '{' '}'          { [] }
 
 symbols :: { Alphabet }
-symbols : var             { [checkSymbol $1]}
-        | symbols ',' var { checkSymbol $3 : $1 }
+symbols : var             { % checkSymbol $1 `thenP` (\c -> returnP [c]) }
+        | symbols ',' var { % checkSymbol $3 `thenP` (\c -> returnP (c : $1)) }
 
 states :: { [State] }
 states : '{' sts '}'  { $2 }
@@ -61,14 +62,39 @@ trns : transition          { [$1] }
      | trns ',' transition { $3 : $1 }
 
 transition :: { Transition }
-transition : '(' var ',' var ',' var ',' var ',' var ')'  { ($2, checkSymbol $4, checkSymbol $6, checkSymbol $8, $10) }
+transition : '(' var ',' var ',' var ',' var ',' var ')'  {% (buildTransition $2 $4 $6 $8 $10) }
 
 
 {
 
-parseError :: [Token] -> a
-parseError [] = error $ "Parse error: empty file"
-parseError xs = error $ "Parse error " ++ (show $ head xs)
+readPDA :: String -> Either String Automaton
+readPDA s = parsePDA s 0
+
+type P a = String -> Int -> Either String a
+
+thenP :: P a -> (a -> P b) -> P b
+m `thenP` k = \s i -> case m s i of
+                       Left e -> Left e
+                       Right a -> k a s i
+
+getLineNum :: P Int
+getLineNum = \s l -> Right l
+
+returnP :: a -> P a
+returnP a = \_ _ -> Right a
+
+failP :: String -> P a
+failP e = \_ _ -> Left e
+
+catchP :: P a -> (String -> P a) -> P a
+catchP m k = \s i -> case m s i of
+                       Left e -> k e s i
+                       Right a -> Right a
+
+
+parseError :: Token -> P a
+parseError t = getLineNum `thenP` \line -> 
+               failP ("Error de parseo en linea: " ++ show line ++ ". Token: " ++ show t)
 
 data Token = TInputAlph 
            | TStackAlph 
@@ -83,32 +109,45 @@ data Token = TInputAlph
            | TLBrace 
            | TRBrace 
            | TVar String
+           | TokenEOF
            deriving Show
 
-lexer :: String -> [Token]
-lexer [] = []
-lexer ('=' : cs) = TEq : lexer cs
-lexer (',' : cs) = TComma : lexer cs
-lexer (';' : cs) = TSemicolon : lexer cs
-lexer ('(' : cs) = TLParen : lexer cs 
-lexer (')' : cs) = TRParen : lexer cs
-lexer ('{' : cs) = TLBrace : lexer cs
-lexer ('}' : cs) = TRBrace : lexer cs
+monadicLexer :: (Token -> P a) -> P a
+monadicLexer cont str =
+    case str of
+        [] -> cont TokenEOF str
+        '\n':str' -> \n -> monadicLexer cont str' (n + 1)
+        _ -> let (token, str') = lexer str in cont token str'
+
+lexer :: String -> (Token, String)
+lexer ('=' : cs) = (TEq, cs)
+lexer (',' : cs) = (TComma, cs)
+lexer (';' : cs) = (TSemicolon, cs)
+lexer ('(' : cs) = (TLParen, cs) 
+lexer (')' : cs) = (TRParen, cs)
+lexer ('{' : cs) = (TLBrace, cs)
+lexer ('}' : cs) = (TRBrace, cs)
 lexer x@(c:cs) = if isSpace c then lexer cs
                               else lexvar x
 
+lexvar :: String -> (Token, String)
 lexvar cs = case span isAcceptedSymbol cs of
-                ("InputAlph", rest) -> TInputAlph : lexer rest
-                ("StackAlph", rest) -> TStackAlph : lexer rest
-                ("States", rest) -> TStates : lexer rest
-                ("AccStates", rest) -> TAccStates : lexer rest
-                ("Transitions", rest) -> TTransitions : lexer rest
-                (var, rest) -> TVar var : lexer rest
+                ("InputAlph", rest) -> (TInputAlph, rest)
+                ("StackAlph", rest) -> (TStackAlph, rest)
+                ("States", rest) -> (TStates, rest)
+                ("AccStates", rest) -> (TAccStates, rest)
+                ("Transitions", rest) -> (TTransitions, rest)
+                (var, rest) -> (TVar var, rest)
 
 reservedSymbols = "=,;(){}"
 
 isAcceptedSymbol = \c -> (isPrint c) && (not $ (c `elem` reservedSymbols) || (isSpace c) || (isControl c))
 
-checkSymbol :: String -> Char
-checkSymbol xs = if length xs == 1 then head xs else error $ "Invalid symbol " ++ xs ++ ". Give only one char at a time."
+buildTransition :: State -> String -> String -> String -> State -> P Transition
+buildTransition st0 sy0 sy1 sy2 st1 = checkSymbol sy0 `thenP` (\sy0' -> checkSymbol sy1 `thenP`
+                                                              (\sy1' -> checkSymbol sy2 `thenP`
+                                                              (\sy2' -> returnP (st0, sy0', sy1', sy2', st1))))
+
+checkSymbol :: String -> P Char
+checkSymbol xs = if length xs == 1 then returnP $ head xs else failP $ "Símbolo " ++ xs ++ ". Dar solo un caracter a la vez."
 }

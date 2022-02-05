@@ -20,14 +20,12 @@ evalPDA au w st sk | null w && st `elem` accStates au = do printVerbose $ "Palab
                                       [] -> do printVerbose $ "No hay pasos siguientes posibles a partir de acá."
                                                return False
                                       _ -> do printVerbose $ "Pasos siguientes posibles: " ++ show steps
-                                              order <- getCheckOrder
-                                              go order steps -- Para backtracking
-                                              where go _ [] = do printVerbose $ "No quedaron más pasos, backtrackeando..."
-                                                                 return False
-                                                    go o s = do ((w', st', sk'), s') <- chooseStep o s
-                                                                b <- evalPDA au w' st' sk'
-                                                                if b then do return True
-                                                                     else go o s'
+                                              go steps -- Para backtracking
+                                              where go [] = do printVerbose $ "No quedaron más pasos, backtrackeando..."
+                                                               return False
+                                                    go ((w', st', sk') : s') = do b <- evalPDA au w' st' sk'
+                                                                                  if b then do return True
+                                                                                       else go s'
 
 nextSteps :: MonadPDA m => Automaton -> String -> State -> Stack -> m [Step]
 nextSteps au w st sk = do transitions <- possibleTransitions au w st sk
@@ -46,7 +44,3 @@ applyTransition w sk (_, sy, hsk, tsk, st) = return (w', st, sk')
                                               w' = if sy == 'λ' then w else (if null w then w else tail w) -- Safe tail
                                               sk'' = if hsk == 'λ' then sk else tail sk
                                               sk' = if tsk == 'λ' then sk'' else tsk : sk''
-
-chooseStep :: MonadPDA m => CheckOrder -> [Step] -> m (Step, [Step])
-chooseStep FirstGiven (x : xs) = return (x, xs)
-chooseStep Random xs = undefined

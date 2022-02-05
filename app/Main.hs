@@ -23,7 +23,6 @@ import PPrint
 
 opts = Env {
     lastFile = def &= argPos 0 &= typFile &= opt "",
-    checkOrder = FirstGiven &=help "Criterio de elección de transiciones." &= typ "first/random" &= groupname "Banderas",
     graphic = False &=help "Graficar autómata.",
     verbose = False &=help "Imprime en consola todas las transiciones realizadas.",
     actualPDA = PDA { inputAlph = [], stackAlph = [], states = [], accStates = [], transitions = []} &= ignore
@@ -37,8 +36,11 @@ main :: IO ()
 main = cmdArgs opts >>= go
    where
        go :: Env -> IO ()
-       go opts = do runPDA opts (runInputT defaultSettings repl)
-                    return ()
+       go opts = do if null $ lastFile opts
+                      then do runPDA opts (runInputT defaultSettings waitForFile)
+                              return ()
+                      else do runPDA opts (runInputT defaultSettings repl)
+                              return ()
 
 prompt = "PDA> "
 
@@ -46,12 +48,12 @@ repl :: (MonadPDA m, MonadMask m) => InputT m ()
 repl = do
     filename <- lift getLastFile
     let (name, ext) = splitExtension filename
-    if ext /= ".pda" || null name
+    if ext /= ".pda"
     then do outputStrLn "Error: Nombre archivo inválido (nombre vacío o extensión incorrecta)."
             waitForFile
-    else do file <- lift $ catchPDA $ loadFile filename
-            case file of
-                Nothing -> do outputStrLn "Error en parseo. Intente cargar otro archivo o arreglar el actual."
+    else do contents <- lift $ catchPDA $ loadFile filename
+            case contents of
+                Nothing -> do outputStrLn "Intente cargar otro archivo o arreglar el actual."
                               waitForFile
                 Just pda -> do lift $ printVerbose $ show pda
                                lift $ setActualPDA pda
@@ -68,7 +70,6 @@ waitForFile :: (MonadPDA m, MonadMask m) => InputT m ()
 waitForFile = return ()
 
 data Command = Eval String
-             | ChangeOrder CheckOrder
              | Verbose
              | PPrintPDA
              | Reload
@@ -79,15 +80,9 @@ data Command = Eval String
 
 data InteractiveCommand = Cmd [String] String (String -> Command) String
 
-parseOrder :: String -> Command
-parseOrder [] = ChangeOrder FirstGiven
-parseOrder (c: _) | c == 'r' || c == 'R' = ChangeOrder Random
-                  | otherwise = ChangeOrder FirstGiven
-
 commands :: [InteractiveCommand]
 commands 
-  = [ Cmd [":order"] "<order>" parseOrder "Cambia al orden de chequeo dado. (Si no se reconoce el orden dado o no se da uno, por defecto cambia a FirstGiven)",
-      Cmd [":verbose"] "" (const Verbose) "Togglea el nivel de verbose actual.",
+  = [ Cmd [":verbose"] "" (const Verbose) "Togglea el nivel de verbose actual.",
       Cmd [":print"] "" (const PPrintPDA) "Imprime en consola el autómata actual.",
       Cmd [":reload"] "" (const Reload)  "Recarga el último archivo cargado.",
       Cmd [":load"] "<file>" Load "Carga un autómata desde un archivo.",
@@ -113,24 +108,23 @@ interpretCommand x = if isPrefixOf ":" x
 -- indicando si se debe salir del programa o no.
 handleCommand ::  MonadPDA m => Command -> m Bool
 handleCommand cmd = do
-   case cmd of
-       Quit          -> return False
-       Noop          -> return True
-       Help          -> printPDA (helpTxt commands) >> return True
-       Verbose       -> do b <- getVerbose
-                           printPDA $ "Verbose fue " ++ if b then "desactivado." else "activado."
-                           setVerbose $ not b
-                           return True
-       PPrintPDA     -> getActualPDA >>= ppPrintPDA >> return True
-       Reload        -> (getLastFile >>= (\f -> loadFile f) >>= setActualPDA) >> printPDA "El archivo fue recargado." >> return True
-       Load f        -> (printPDA $ "Abriendo archivo: " ++ f) >> setLastFile f >> (loadFile f >>= setActualPDA) >> return True
-       ChangeOrder o -> (printPDA $ "Orden cambiado a " ++ show o) >> setCheckOrder o >> return True
-       Eval w        -> do printPDA $ if null w then "La palabra vacía fue entrada." else "La palabra entrada fue: " ++ w
-                           pda <- getActualPDA
-                           result <- evalPDA pda w (head $ states pda) ""
-                           printPDA $ (if result then "La palabra fue aceptada." 
-                                                 else "La palabra no fue aceptada.")
-                           return True
+  case cmd of
+      Quit          -> return False
+      Noop          -> return True
+      Help          -> printPDA (helpTxt commands) >> return True
+      Verbose       -> do b <- getVerbose
+                          printPDA $ "Verbose fue " ++ if b then "desactivado." else "activado."
+                          setVerbose $ not b
+                          return True
+      PPrintPDA     -> getActualPDA >>= ppPrintPDA >> return True
+      Reload        -> (getLastFile >>= (\f -> loadFile f) >>= setActualPDA) >> printPDA "El archivo fue recargado." >> return True
+      Load f        -> (printPDA $ "Abriendo archivo: " ++ f) >> (loadFile f >>= setActualPDA) >> return True
+      Eval w        -> do printPDA $ if null w then "La palabra vacía fue entrada." else "La palabra entrada fue: " ++ w
+                          pda <- getActualPDA
+                          result <- evalPDA pda w (head $ states pda) ""
+                          printPDA $ (if result then "La palabra fue aceptada." 
+                                                else "La palabra no fue aceptada.")
+                          return True
 
 helpTxt :: [InteractiveCommand] -> String
 helpTxt cs
@@ -147,5 +141,8 @@ loadFile f = do
               (\e -> do let err = show (e :: IOException)
                         hPutStrLn stderr ("No se pudo abrir el archivo " ++ f ++ ": " ++ err)
                         return "")
-  setLastFile f
-  return (parsePDA $ lexer x)
+  if null x
+    then failPDA "Archivo vacío/inexistente"
+    else case readPDA x of
+          Left e -> failPDA e
+          Right pda -> return pda
