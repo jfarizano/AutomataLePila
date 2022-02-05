@@ -1,9 +1,6 @@
-- Manejar cuando no hay automata cargado
-- Manejar cuando ya hay archivo cargado y se carga otro no válido.
 - ¿Volver a agregar el random y exhaustive?
 - Llorar
 - ¿Graficar solo el autómata o todo el proceso de evaluación?
-- ¿Faltan verificaciones para ver que el autómata sea válido?
 - Pretty printing con colorcitos
 - Comentar el código. No seas burro Fari, no comentaste nada (se hablaba solo)
 - Seguir llorando

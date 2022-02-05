@@ -27,7 +27,9 @@ dependencies:
 - haskeline
 - cmdargs
 - exceptions
-
+- text
+- prettyprinter
+- prettyprinter-ansi-terminal
 
 library:
   source-dirs: src

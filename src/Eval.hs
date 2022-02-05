@@ -1,10 +1,7 @@
 module Eval ( evalPDA ) where
 
-import Control.Monad ( foldM, mapM )
-import Control.Monad.Trans
-
 import Lang
-import Global ( Env(..) )
+import Global
 import Monad
 import PPrint
 

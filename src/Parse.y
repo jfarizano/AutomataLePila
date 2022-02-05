@@ -64,7 +64,6 @@ trns : transition          { [$1] }
 transition :: { Transition }
 transition : '(' var ',' var ',' var ',' var ',' var ')'  {% (buildTransition $2 $4 $6 $8 $10) }
 
-
 {
 
 parsePDA :: String -> Either String Automaton
@@ -90,7 +89,6 @@ catchP :: P a -> (String -> P a) -> P a
 catchP m k = \s i -> case m s i of
                        Left e -> k e s i
                        Right a -> Right a
-
 
 parseError :: Token -> P a
 parseError t = getLineNum `thenP` \line -> 
@@ -150,4 +148,5 @@ buildTransition st0 sy0 sy1 sy2 st1 = checkSymbol sy0 `thenP` (\sy0' -> checkSym
 
 checkSymbol :: String -> P Char
 checkSymbol xs = if length xs == 1 then returnP $ head xs else failP $ "Símbolo " ++ xs ++ ". Dar solo un caracter a la vez."
+
 }

@@ -2,4 +2,5 @@ InputAlph = {a, b};
 StackAlph = {a, b, #};
 States = {s0, s1, s2};
 AccStates = {s0, s2};
-Transitions = {(s0, λ, λ, #, s1), (s1, b, a, λ, s1), (s1, b, λ, b, s1), (s1, a, b, λ, s1), (s1, a, λ, a, s1), (s1, λ, #, λ, s2)}
+Transitions = {(s0, λ, λ, #, s1), (s1, b, a, λ, s1), (s1, b, λ, b, s1),
+(s1, a, b, λ, s1), (s1, a, λ, a, s1), (s1, λ, #, λ, s2)}

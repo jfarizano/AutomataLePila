@@ -45,6 +45,9 @@ library
     , filepath
     , haskeline
     , mtl
+    , prettyprinter
+    , prettyprinter-ansi-terminal
+    , text
   default-language: Haskell2010
 
 executable AutomataLePila-exe
@@ -63,6 +66,9 @@ executable AutomataLePila-exe
     , filepath
     , haskeline
     , mtl
+    , prettyprinter
+    , prettyprinter-ansi-terminal
+    , text
   default-language: Haskell2010
 
 test-suite AutomataLePila-test
@@ -82,4 +88,7 @@ test-suite AutomataLePila-test
     , filepath
     , haskeline
     , mtl
+    , prettyprinter
+    , prettyprinter-ansi-terminal
+    , text
   default-language: Haskell2010

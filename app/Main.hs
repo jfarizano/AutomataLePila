@@ -1,11 +1,9 @@
-{-# LANGUAGE DeriveDataTypeable #-}
-
 module Main where
 
 import Control.Monad ( when, liftM )
 import Control.Monad.Trans ( lift, liftIO )
 import Control.Monad.Catch ( MonadMask )
-import Control.Exception ( try, catch , IOException )
+import Control.Exception ( catch, IOException )
 import System.Console.Haskeline ( defaultSettings, getInputLine, outputStrLn, runInputT, InputT )
 import System.Console.CmdArgs.Implicit
 import System.FilePath ( splitExtension )
@@ -171,7 +169,7 @@ readPDA f = do
                                                 else failPDA "Error: Autómata inválido"
 
 checkWord :: MonadPDA m => String -> m Bool
-checkWord w = do printPDA $ if null w then "La palabra vacía fue entrada." 
+checkWord w = do printPDA $ if null w then "La palabra vacía fue entrada."
                                       else "La palabra entrada fue: " ++ w
                  pda <- getActualPDA
                  if and $ map (\c -> c `elem` (inputAlph pda)) w
