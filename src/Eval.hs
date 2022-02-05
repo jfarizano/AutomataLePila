@@ -8,7 +8,6 @@ import Global ( Env(..) )
 import Monad
 import PPrint
 
-
 evalPDA :: MonadPDA m => Automaton -> State -> String -> Stack -> m Bool
 evalPDA au st w sk | null w && st `elem` accStates au = do printVerbose $ "Palabra aceptada en el estado: " ++ st ++ ". Contenido restante de pila: " ++ sk
                                                            return True
