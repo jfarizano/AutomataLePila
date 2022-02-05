@@ -121,12 +121,7 @@ handleCommand cmd = do
       PPrintPDA     -> getActualPDA >>= ppPrintPDA >> return True
       Reload        -> (getLastFile >>= (\f -> loadFile f) >>= setActualPDA) >> printPDA "El archivo fue recargado." >> return True
       Load f        -> (printPDA $ "Abriendo archivo: " ++ f) >> (loadFile f >>= setActualPDA) >> return True
-      Eval w        -> do printPDA $ if null w then "La palabra vacía fue entrada." else "La palabra entrada fue: " ++ w
-                          pda <- getActualPDA
-                          result <- evalPDA pda w
-                          printPDA $ (if result then "La palabra fue aceptada." 
-                                                else "La palabra no fue aceptada.")
-                          return True
+      Eval w        -> checkWord w
 
 helpTxt :: [InteractiveCommand] -> String
 helpTxt cs
@@ -148,3 +143,14 @@ loadFile f = do
     else case readPDA x of
           Left e -> failPDA e
           Right pda -> verifyPDA pda
+
+checkWord :: MonadPDA m => String -> m Bool
+checkWord w = do printPDA $ if null w then "La palabra vacía fue entrada." else "La palabra entrada fue: " ++ w
+                 pda <- getActualPDA
+                 if and $ map (\c -> c `elem` (inputAlph pda)) w
+                 then do result <- evalPDA pda w
+                         printPDA $ (if result then "La palabra fue aceptada." 
+                                               else "La palabra no fue aceptada.")
+                         return True
+                 else do printPDA $ "La palabra tiene caracteres que no se encuentran en el alfabeto de entrada. Palabra no aceptada."
+                         return True
