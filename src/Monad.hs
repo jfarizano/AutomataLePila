@@ -47,9 +47,14 @@ printPDA = liftIO . putStrLn
 failPDA :: MonadPDA m => String -> m a
 failPDA = throwError
 
-catchPDA  :: MonadPDA m => m a -> m (Maybe a)
+catchPDA :: MonadPDA m => m a -> m (Maybe a)
 catchPDA c = catchError (Just <$> c) 
-                        (\e -> liftIO $ putStrLn e >> return Nothing)
+                        (\e -> liftIO $ putStrLn ("\ESC[31m" ++ "[ERROR] " ++ "\ESC[0m" ++ e) >> return Nothing)
+
+doIfVerbose :: MonadPDA m => (a -> m ()) -> a -> m ()
+doIfVerbose f a = do v <- getVerbose
+                     if v then f a
+                          else return ()
 
 type PDA = StateT Env (ExceptT String IO)
 

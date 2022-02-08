@@ -40,18 +40,18 @@ main = cmdArgs opts >>= go
        go opts = do runPDA opts (runInputT defaultSettings repl)
                     return ()
 
-prompt = "PDA> "
+prompt = "\ESC[32m" ++ "PDA> " ++ "\ESC[0m"
 
 repl :: (MonadPDA m, MonadMask m) => InputT m () 
 repl = do
     filename <- lift getLastFile
     if null filename
-    then do outputStrLn "Advertencia: No se dió ningún archivo como argumento."
-            outputStrLn "Iniciando sin autómata cargado."
+    then do lift $ ppWarning "No se dió ningún archivo como argumento."
+            lift $ ppWarning "Iniciando sin autómata cargado."
             loop
     else do contents <- lift $ catchPDA $ loadFile filename
             case contents of
-              Nothing -> do outputStrLn "Iniciando sin autómata cargado."            
+              Nothing -> do lift $ ppWarning "Iniciando sin autómata cargado."            
                             loop
               Just pda -> loop
     where
@@ -111,14 +111,14 @@ handleCommand cmd = do
         Verbose -> toggleVerbose >> return True
         Reload  -> reloadFile >> return True
         Load f  -> loadFile f >> return True
-        _       -> do printPDA $ "Error: Operación no permitida, no se encuentra un autómata válido cargado."
+        _       -> do ppError $ "No se encuentra un autómata válido cargado."
                       return True 
   else case cmd of
         Quit       -> return False
         Noop       -> return True
         Help       -> printPDA (helpTxt commands) >> return True
         Verbose    -> toggleVerbose >> return True
-        PPrintPDA  -> getActualPDA >>= ppPrintPDA >> return True
+        PPrintPDA  -> getActualPDA >>= ppPDA >> return True
         Reload     -> reloadFile >> return True
         Load f     -> loadFile f >> return True
         Eval w     -> checkWord w >> return True
@@ -127,28 +127,29 @@ helpTxt :: [InteractiveCommand] -> String
 helpTxt cs
   =  "Lista de comandos:  Cualquier comando puede ser abreviado a :c donde\n" ++
      "c es el primer caracter del nombre completo.\n\n" ++
-     "<word>                  verifica si el autómata cargado acepta la palabra\n" ++
+     "<word>                  verifica si el autómata cargado acepta la palabra.\n" ++
      unlines (map (\ (Cmd c a _ d) ->
                    let  ct = concat (intersperse ", " (map (++ if null a then "" else " " ++ a) c))
                    in   ct ++ replicate ((24 - length ct) `max` 2) ' ' ++ d) cs)
 
 toggleVerbose :: MonadPDA m => m ()
 toggleVerbose = do b <- getVerbose
-                   printPDA $ "Verbose fue " ++ if b then "desactivado." 
+                   ppOpDone $ "Verbose fue " ++ if b then "desactivado." 
                                                      else "activado."
                    setVerbose $ not b
 
 loadFile :: MonadPDA m => FilePath -> m ()
-loadFile f = do printPDA $ "Abriendo archivo " ++ f
+loadFile f = do ppOpDone $ "Abriendo archivo " ++ f
                 setLastFile f
                 x <- catchPDA $ readPDA f
                 case x of
                   Nothing -> do setCanRunPDA False
-                                printPDA $ "No se pudo cargar el autómata, cargue uno válido antes de seguir."
+                                ppWarning "No se pudo cargar el autómata, cargue uno válido antes de seguir."
                   Just pda -> do setActualPDA pda
                                  setCanRunPDA True
-                                 printVerbose $ show pda
-                                 printPDA "El archivo fue cargado."
+                                 ppVerbose "Autómata cargado."
+                                 doIfVerbose ppPDA pda
+                                 ppOpDone "El archivo fue cargado."
                 
 reloadFile :: MonadPDA m => m ()
 reloadFile = getLastFile >>= loadFile
@@ -157,25 +158,25 @@ readPDA :: MonadPDA m => FilePath -> m Automaton
 readPDA f = do
   let (name, ext) = splitExtension f
   if null name || ext /= ".pda"
-  then failPDA "Error: Nombre archivo inválido (nombre vacío o extensión incorrecta)."
+  then failPDA "Nombre archivo inválido (nombre vacío o extensión incorrecta)."
   else do x <- liftIO $ catch (Right `liftM` readFile f) (return . Left)
           case x of
-            Left e -> failPDA $ "Error: No se pudo leer el archivo. " ++ show (e :: IOException)
+            Left e -> failPDA $ "No se pudo leer el archivo. " ++ show (e :: IOException)
             Right contents -> case parsePDA contents of
-                                Left e -> failPDA $ show e
+                                Left e -> failPDA e
                                 Right pda -> do b <- verifyPDA pda
                                                 if b
                                                 then return pda
-                                                else failPDA "Error: Autómata inválido"
+                                                else failPDA "Se intentó cargar un autómata inválido."
 
 checkWord :: MonadPDA m => String -> m Bool
 checkWord w = do printPDA $ if null w then "La palabra vacía fue entrada."
-                                      else "La palabra entrada fue: " ++ w
+                                      else "La palabra entrada fue: " ++ w ++ "."
                  pda <- getActualPDA
                  if and $ map (\c -> c `elem` (inputAlph pda)) w
                  then do result <- evalPDA pda w
-                         printPDA $ (if result then "La palabra fue aceptada." 
-                                               else "La palabra no fue aceptada.")
+                         ppResult result
                          return result
-                 else do printPDA $ "La palabra contiene caracteres que no se encuentran en el alfabeto de entrada, palabra no aceptada."
+                 else do printPDA "La palabra contiene caracteres que no se encuentran en el alfabeto de entrada."
+                         ppResult False
                          return False

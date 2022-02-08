@@ -11,7 +11,7 @@ type State = String
 
 type Stack = [Symbol]
 
-type Step = (String, State, Stack)
+type Step = (State, String, Stack)
 
 -- (Estado actual, simbolo a leer palabra, simbolo a sacar de la pila, simbolo pongo en pila, estado siguiente)
 type Transition = (State, Symbol, Symbol, Symbol, State)

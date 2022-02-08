@@ -10,7 +10,7 @@ import Data.Char ( isPrint, isSpace, isControl )
 %name parse_PDA
 %tokentype { Token }
 %monad { P } { thenP } { returnP }
-%lexer { monadicLexer } { TokenEOF }
+%lexer { monadicLexer } { TEOF }
 %error { parseError }
 
 %token
@@ -107,17 +107,19 @@ data Token = TInputAlph
            | TLBrace 
            | TRBrace 
            | TVar String
-           | TokenEOF
+           | TEOF
+           | TCharError Char
            deriving Show
 
 monadicLexer :: (Token -> P a) -> P a
 monadicLexer cont str =
     case str of
-        [] -> cont TokenEOF str
+        [] -> cont TEOF str
         '\n':str' -> \n -> monadicLexer cont str' (n + 1)
         _ -> let (token, str') = lexer str in cont token str'
 
 lexer :: String -> (Token, String)
+lexer [] = (TEOF, [])
 lexer ('=' : cs) = (TEq, cs)
 lexer (',' : cs) = (TComma, cs)
 lexer (';' : cs) = (TSemicolon, cs)
@@ -125,8 +127,9 @@ lexer ('(' : cs) = (TLParen, cs)
 lexer (')' : cs) = (TRParen, cs)
 lexer ('{' : cs) = (TLBrace, cs)
 lexer ('}' : cs) = (TRBrace, cs)
-lexer x@(c:cs) = if isSpace c then lexer cs
-                              else lexvar x
+lexer x@(c:cs) | isSpace c = lexer cs
+               | isAcceptedSymbol c = lexvar x
+               | otherwise = (TCharError c, cs)
 
 lexvar :: String -> (Token, String)
 lexvar cs = case span isAcceptedSymbol cs of
@@ -147,6 +150,9 @@ buildTransition st0 sy0 sy1 sy2 st1 = checkSymbol sy0 `thenP` (\sy0' -> checkSym
                                                               (\sy2' -> returnP (st0, sy0', sy1', sy2', st1))))
 
 checkSymbol :: String -> P Char
-checkSymbol xs = if length xs == 1 then returnP $ head xs else failP $ "Símbolo " ++ xs ++ ". Dar solo un caracter a la vez."
+checkSymbol xs = getLineNum `thenP` \line -> 
+                 if length xs == 1 
+                 then returnP $ head xs 
+                 else failP $ "Error de parseo en línea " ++ show line ++ " al leer el símbolo " ++ xs ++ ". Dar solo un caracter a la vez."
 
 }

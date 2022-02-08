@@ -1,0 +1,7 @@
+InputAlph = {a, b, asdasd};
+StackAlph = {a, b, #};
+States = {s0, A, S, B, Q};
+AccStates = {s0, Q};
+Transitions = {(s0, λ, λ, #, S), (S, a, b, λ, S), (S, b, a, λ, S), 
+(S, a, a, a, A), (S, a, #, #, A), (A, λ, λ, a, S), (S, b, b, b, B), 
+(S, b, #, #, B), (B, λ, λ, b, S), (S, λ, #, λ, Q)}

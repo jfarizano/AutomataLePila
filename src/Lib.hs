@@ -3,6 +3,7 @@ module Lib where
 import Lang
 import Monad
 import Global
+import PPrint
 
 verifyPDA :: MonadPDA m => Automaton -> m Bool
 verifyPDA au = do balph <- verifyAlph ialph salph
@@ -21,9 +22,9 @@ verifyAlph ialph salph = do bl <- mapM go ialph
                             return $ and bl
                          where
                            go c = if c `elem` salph
-                                    then return True
-                                    else do printPDA $ "El símbolo " ++ show c ++ " del alfabeto de entrada no pertenece al alfabeto de pila."
-                                            return False
+                                  then return True
+                                  else do ppErrorStackSy c
+                                          return False
 
 verifyAccStates :: MonadPDA m => [State] -> [State] -> m Bool
 verifyAccStates st accSt = do bl <- mapM go accSt
@@ -31,7 +32,7 @@ verifyAccStates st accSt = do bl <- mapM go accSt
                            where
                              go s = if s `elem` st
                                     then return True
-                                    else do printPDA $ "El estado de aceptación " ++ show s ++ " no está dado como un estado."
+                                    else do ppErrorAccState s
                                             return False
 
 verifyTransitions :: MonadPDA m => [Transition] -> [State] -> Alphabet -> Alphabet -> m Bool
@@ -46,13 +47,13 @@ verifyTransitions tr st ialph salph = do bl <- mapM go tr
                                                                             return $ and [b0, b1, b2, b3, b4]
                                         symIn t c = if c == 'λ' || c `elem` ialph
                                                     then return True
-                                                    else do printPDA $ "En la transición " ++ show t ++ " el caracter " ++ show c ++ " no pertenece al alfabeto de entrada."
+                                                    else do ppErrorTrInSy t c
                                                             return False
                                         symSk t c = if c == 'λ' || c `elem` salph
                                                     then return True
-                                                    else do printPDA $ "En la transición " ++ show t ++ " el caracter " ++ show c ++ " no pertenece al alfabeto de pila."
+                                                    else do ppErrorTrSkSy t c
                                                             return False
                                         stt t s = if s `elem` st
                                                   then return True
-                                                  else do printPDA $ "En la transición " ++ show t ++ " el estado " ++ show s ++ " no es un estado válido."
+                                                  else do ppErrorTrState t s
                                                           return False
