@@ -3,8 +3,9 @@ module Parse (
     parsePDA
 ) where
 
-import Lang
 import Data.Char ( isPrint, isSpace, isControl )
+
+import Lang
 }
 
 %name parse_PDA

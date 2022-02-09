@@ -30,6 +30,8 @@ dependencies:
 - text
 - prettyprinter
 - prettyprinter-ansi-terminal
+- graphviz
+- fgl
 
 library:
   source-dirs: src
