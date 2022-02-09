@@ -24,22 +24,22 @@ ppOpDone :: MonadPDA m => String -> m ()
 ppOpDone = prettyPrint . opDone2doc
 
 opDone2doc :: String -> Doc AnsiStyle
-opDone2doc s = sep [opDoneColor $ pretty "→", pretty s]
+opDone2doc s = hsep [opDoneColor $ pretty "→", pretty s]
 
 ppWarning :: MonadPDA m => String -> m ()
 ppWarning = prettyPrint . warning2doc
 
 warning2doc :: String -> Doc AnsiStyle
-warning2doc w = sep [warningColor $ pretty "[ADVERTENCIA]", pretty w]
+warning2doc w = hsep [warningColor $ pretty "[ADVERTENCIA]", pretty w]
 
 ppError :: MonadPDA m => String -> m ()
 ppError = prettyPrint . error2doc
 
 error2doc :: String -> Doc AnsiStyle
-error2doc e = sep [errorColor $ pretty "[ERROR]", pretty e]
+error2doc e = hsep [errorColor $ pretty "[ERROR]", pretty e]
 
 verbose2doc :: String -> Doc AnsiStyle
-verbose2doc s = sep [verboseColor $ pretty "[v]", pretty s]
+verbose2doc s = hsep [verboseColor $ pretty "[v]", pretty s]
 
 ppVerbose :: MonadPDA m => String -> m ()
 ppVerbose s = do v <- getVerbose
@@ -144,21 +144,23 @@ ppResult True = prettyPrint $ sep [pretty "La palabra fue", cat [annotate (color
 ppResult False = prettyPrint $ sep [pretty "La palabra fue", cat [annotate (color Red) $ pretty "rechazada", dot]]
 
 ppVerboseGraphic :: MonadPDA m => FilePath -> m ()
-ppVerboseGraphic f = do hSep <- gethSep
-                        vSep <- getvSep
-                        dpi <- getDpi
-                        tr <- getTransparentBg
-                        prettyPrint $ sep [verbose2doc "Se guardó el autómata graficado al archivo",
-                                           pretty f,
-                                           pretty "con separación horizontal",
-                                           pretty hSep,
-                                           pretty "separación vertical",
-                                           pretty vSep,
-                                           pretty "DPI",
-                                           pretty dpi,
-                                           pretty "y",
-                                           pretty $ if tr then "con" else "sin",
-                                           pretty "fondo transparente."]
+ppVerboseGraphic f = doIfVerbose go f
+                     where
+                      go f = do hSep <- gethSep
+                                vSep <- getvSep
+                                dpi <- getDpi
+                                tr <- getTransparentBg
+                                prettyPrint $ hsep [verbose2doc "Se guardó el autómata graficado al archivo",
+                                                    pretty f,
+                                                    pretty "con separación horizontal",
+                                                    pretty hSep,
+                                                    pretty "separación vertical",
+                                                    pretty vSep,
+                                                    pretty "DPI",
+                                                    pretty dpi,
+                                                    pretty "y",
+                                                    pretty $ if tr then "con" else "sin",
+                                                    pretty "fondo transparente."]
 
 ppErrorStackSy :: MonadPDA m => Symbol -> m ()
 ppErrorStackSy sy = doIfVerbose prettyPrint (sep [sep [verbose2doc "En el alfabeto de pila no se encuentra el caracter",

@@ -43,7 +43,7 @@ gStyle = do hSep <- gethSep
             tr <- getTransparentBg
             return $ [GraphAttrs [NodeSep vSep, RankSep [hSep],
                                   Size $ GSize 8 (Just 5) True, DPI dpi,
-                                  RankDir FromLeft, Rank SameRank,
+                                  RankDir FromLeft,
                                   BgColor $ if tr then [toWC $ X11Color Transparent]  
                                                   else [toWC $ X11Color White]],
                       NodeAttrs  [textLabel $ pack "\\N"],
@@ -53,10 +53,13 @@ dotParams :: MonadPDA m => Automaton -> m (GraphvizParams Node State String () S
 dotParams au = do global <- gStyle
                   return $ nonClusteredParams { 
   globalAttributes = global,
-  fmtNode = \(_, label) -> [Label (StrLabel (pack label)), 
-                            Shape $ if label `elem` accStates au then DoubleCircle 
-                                                                 else Circle], 
-  fmtEdge = \(_, _, label) -> [Label (StrLabel (pack label))]}
+  fmtNode = \(n, label) -> ([Label (StrLabel (pack label)), 
+                             Shape $ if label `elem` accStates au then DoubleCircle 
+                                                                  else Circle]
+                             ++ if n == 0 then [Style $ [SItem Invisible []], NodeSep 0,
+                                                Height 0, Width 0, Margin $ DVal 0]
+                                          else []),
+  fmtEdge = \(n, n', label) -> [Label (StrLabel (pack label))]}
 
 pda2graph :: Automaton -> Gr State String
 pda2graph au = mkGraph nodes edges
@@ -64,8 +67,9 @@ pda2graph au = mkGraph nodes edges
                  st = states au
                  tr = transitions au
                  findNode s = fst $ fromJust $ find (\(_, x) -> x == s) nodes
-                 nodes = zip [0..] st
-                 edges = map (\(st0, sy0, sy1, sy2, st1) -> (findNode st0, findNode st1, (createLabel sy0 sy1 sy2))) tr
+                 nodes = zip [0..] ("" : st)
+                 edges' = map (\(st0, sy0, sy1, sy2, st1) -> (findNode st0, findNode st1, (createLabel sy0 sy1 sy2))) tr
+                 edges = ((0, 1, "") : edges')
 
 createLabel :: Char -> Char -> Char -> String
 createLabel a b c = a' ++ ";" ++ b' ++ ";" ++ c'

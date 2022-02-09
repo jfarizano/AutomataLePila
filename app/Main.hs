@@ -27,7 +27,7 @@ opts = Env {
     verbose = False &= groupname "Opciones de ejecución" &= help "Imprime en consola todas las transiciones realizadas.",
     actualPDA = PDA { inputAlph = [], stackAlph = [], states = [], accStates = [], transitions = []} &= ignore,
     canRunPDA = False &= ignore,
-    hSep = 2.5 &= name "hs" &= groupname "Opciones gráficas" &= help "Distancia horizontal entre nodos en el gráfico." &= typ "NUM",
+    hSep = 1 &= name "hs" &= groupname "Opciones gráficas" &= help "Distancia horizontal entre nodos en el gráfico." &= typ "NUM",
     vSep = 0.5 &= name "vs" &= help "Distancia vertical entre nodos en el gráfico." &= typ "NUM",
     dpi = 800 &= help "Densidad de resolución del gráfico (no la resolución en sí)." &= typ "NUM",
     transparentBg = False &= name "tr" &= help "Si se activa se grafica el autómata con fondo transparente."
