@@ -9,6 +9,8 @@ import Global
 import Control.Monad.State
 import Control.Monad.Except
 
+-- | Defino la mónada MonadPDA que me permite realizar operaciones de
+-- input/output, llevar un estado de tipo Env y manejo de errores.
 class (MonadIO m, MonadState Env m, MonadError String m) => MonadPDA m where
 
 setLastFile :: MonadPDA m => FilePath -> m ()
@@ -76,7 +78,9 @@ doIfVerbose f a = do v <- getVerbose
 
 type PDA = StateT Env (ExceptT String IO)
 
+-- | Esta es una instancia vacía, ya que 'MonadPDA' no tiene funciones miembro.
 instance MonadPDA PDA
 
+-- | Corre una computación de MonadPDA con el estado dado.
 runPDA :: Env -> PDA a -> IO (Either String (a, Env))
 runPDA e m = runExceptT $ runStateT m e

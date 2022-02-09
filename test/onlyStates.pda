@@ -1,0 +1,5 @@
+InputAlph = {};
+StackAlph = {};
+States = {A, B, C, D, E, F, G, H, I};
+AccStates = {A, E, I};
+Transitions = {}

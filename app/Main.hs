@@ -22,9 +22,11 @@ import PPrint
 import Lib
 import Graphic
 
+-- | Atributos y valores iniciales para el parser de argumentos. Contiene el 
+-- estado global por defecto.
 opts = Env {
     lastFile = def &= argPos 0 &= typFile &= opt "",
-    verbose = False &= groupname "Opciones de ejecución" &= help "Imprime en consola todas las transiciones realizadas.",
+    verbose = False &= groupname "Opciones de ejecución" &= help "Imprime en consola todas las transiciones realizadas y demás datos relacionados a la ejecución del programa.",
     actualPDA = PDA { inputAlph = [], stackAlph = [], states = [], accStates = [], transitions = []} &= ignore,
     canRunPDA = False &= ignore,
     hSep = 1 &= name "hs" &= groupname "Opciones gráficas" &= help "Distancia horizontal entre nodos en el gráfico." &= typ "NUM",
@@ -39,6 +41,7 @@ opts = Env {
   &= versionArg [ignore]
   &= noAtExpand
 
+-- | Función principal que inicia el sistema.
 main :: IO ()
 main = cmdArgs opts >>= go
    where
@@ -48,6 +51,8 @@ main = cmdArgs opts >>= go
 
 prompt = "\ESC[32m" ++ "PDA> " ++ "\ESC[0m"
 
+-- | Read-Eval-Print Loop
+-- Realiza el loop interactivo en consola, recibiendo comandos e interpretándolos.
 repl :: (MonadPDA m, MonadMask m) => InputT m () 
 repl = do
     filename <- lift getLastFile
@@ -68,6 +73,7 @@ repl = do
                                    b <- lift $ catchPDA $ handleCommand c
                                    maybe loop (`when` loop) b
 
+-- | Estructura de comandos realizables en consola.
 data Command = Eval String
              | Verbose
              | PPrintPDA
@@ -76,7 +82,7 @@ data Command = Eval String
              | Load FilePath
              | Help
              | Quit
-             | Noop   -- No se dió un comando correcto y no se realiza nada
+             | Noop   -- No se dió un comando correcto y no se realiza nada.
 
 data InteractiveCommand = Cmd [String] String (String -> Command) String
 
@@ -91,6 +97,8 @@ commands
       Cmd [":quit"] "" (const Quit) "Salir del programa."
     ]
 
+-- | Recibe un string entrado por consola y devulve su representación
+-- correspondiente como comando interactivo.
 interpretCommand :: String -> IO Command
 interpretCommand x = 
   if isPrefixOf ":" x 
@@ -106,8 +114,8 @@ interpretCommand x =
                         return Noop
   else return (Eval x)
 
--- | 'handleCommand' interpreta un comando y devuelve un booleano
--- indicando si se debe salir del programa o no.
+-- | Interpreta un comando y devuelve un booleano indicando si se debe salir del
+-- programa o no.
 handleCommand ::  MonadPDA m => Command -> m Bool
 handleCommand cmd = do
   b <- getCanRunPDA
@@ -132,6 +140,7 @@ handleCommand cmd = do
         Load f     -> loadFile f >> return True
         Eval w     -> checkWord w >> return True
 
+-- | Función que devuelve el texto a imprimir por el comando de ayuda.
 helpTxt :: [InteractiveCommand] -> String
 helpTxt cs
   =  "Lista de comandos:  Cualquier comando puede ser abreviado a :c donde\n" ++
@@ -141,12 +150,15 @@ helpTxt cs
                    let  ct = concat (intersperse ", " (map (++ if null a then "" else " " ++ a) c))
                    in   ct ++ replicate ((24 - length ct) `max` 2) ' ' ++ d) cs)
 
+-- | Función usada por el comando verbose, si el modo verbose está desactivado
+-- lo activa y viceversa.
 toggleVerbose :: MonadPDA m => m ()
 toggleVerbose = do b <- getVerbose
                    ppOpDone $ "Verbose fue " ++ if b then "desactivado." 
                                                      else "activado."
                    setVerbose $ not b
 
+-- | Función que realiza el trabajo del comando de cargar archivo.
 loadFile :: MonadPDA m => FilePath -> m ()
 loadFile f = do ppOpDone $ "Abriendo archivo " ++ f
                 setLastFile f
@@ -159,10 +171,14 @@ loadFile f = do ppOpDone $ "Abriendo archivo " ++ f
                                  ppVerbose "Autómata cargado."
                                  doIfVerbose ppPDA pda
                                  ppOpDone "El archivo fue cargado."
-                
+
+-- | Función que realiza el comando reload, hace un loadFile sobre el último
+-- archivo cargado previamente.
 reloadFile :: MonadPDA m => m ()
 reloadFile = getLastFile >>= loadFile
 
+-- | Dado un archivo carga en el estado global el autómata escrito en él si
+-- este es un autómata válido.
 readPDA :: MonadPDA m => FilePath -> m Automaton
 readPDA f = do
   let (name, ext) = splitExtension f
@@ -178,6 +194,8 @@ readPDA f = do
                                                 then return pda
                                                 else failPDA "Se intentó cargar un autómata inválido."
 
+-- | Dada una palabra chequea si el autómata cargado en el estado global
+-- la reconoce.
 checkWord :: MonadPDA m => String -> m Bool
 checkWord w = do printPDA $ if null w then "La palabra vacía fue entrada."
                                       else "La palabra entrada fue: " ++ w ++ "."

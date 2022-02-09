@@ -5,6 +5,7 @@ import Monad
 import Global
 import PPrint
 
+-- | Dado un autómata verifica si este es válido.
 verifyPDA :: MonadPDA m => Automaton -> m Bool
 verifyPDA au = do balph <- verifyAlph ialph salph
                   baccs <- verifyAccStates st accSt
@@ -17,6 +18,8 @@ verifyPDA au = do balph <- verifyAlph ialph salph
                  accSt = accStates au
                  tr = transitions au
 
+-- | Dados los alfabetos de entrada y pila verifica que todos los símbolos
+-- del alfabeto de entrada también se encuentren en el de pila.
 verifyAlph :: MonadPDA m => Alphabet -> Alphabet -> m Bool
 verifyAlph ialph salph = do bl <- mapM go ialph
                             return $ and bl
@@ -26,6 +29,8 @@ verifyAlph ialph salph = do bl <- mapM go ialph
                                   else do ppErrorStackSy c
                                           return False
 
+-- | Dadas las listas de estados y estados de aceptación verifica que todos
+-- los estados de aceptación también sean estados dados.
 verifyAccStates :: MonadPDA m => [State] -> [State] -> m Bool
 verifyAccStates st accSt = do bl <- mapM go accSt
                               return $ and bl
@@ -35,6 +40,8 @@ verifyAccStates st accSt = do bl <- mapM go accSt
                                     else do ppErrorAccState s
                                             return False
 
+-- | Verifica que en las transiciones todas las componentes de las tuplas sean
+-- válidas.
 verifyTransitions :: MonadPDA m => [Transition] -> [State] -> Alphabet -> Alphabet -> m Bool
 verifyTransitions tr st ialph salph = do bl <- mapM go tr
                                          return $ and bl
