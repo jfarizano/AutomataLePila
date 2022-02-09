@@ -13,3 +13,12 @@
 *.dvi
 *.xdv
 *-converted-to.*
+*.png
+*.jpg
+*.jpeg
+*.pdf
+!document/informe.pdf
+*.txt
+!document/*.txt
+*.dot
+*.svg

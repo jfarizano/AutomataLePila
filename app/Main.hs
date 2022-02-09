@@ -4,6 +4,7 @@ import Control.Monad ( when, liftM )
 import Control.Monad.Trans ( lift, liftIO )
 import Control.Monad.Catch ( MonadMask )
 import Control.Exception ( catch, IOException )
+
 import System.Console.Haskeline ( defaultSettings, getInputLine, outputStrLn, runInputT, InputT )
 import System.Console.CmdArgs.Implicit
 import System.FilePath ( splitExtension )
@@ -19,19 +20,24 @@ import Monad
 import Eval
 import PPrint
 import Lib
+import Graphic
 
 opts = Env {
     lastFile = def &= argPos 0 &= typFile &= opt "",
-    graphic = False &=help "Graficar autómata.",
-    verbose = False &=help "Imprime en consola todas las transiciones realizadas.",
+    verbose = False &= groupname "Opciones de ejecución" &= help "Imprime en consola todas las transiciones realizadas.",
     actualPDA = PDA { inputAlph = [], stackAlph = [], states = [], accStates = [], transitions = []} &= ignore,
-    canRunPDA = False &= ignore
+    canRunPDA = False &= ignore,
+    hSep = 2.5 &= name "hs" &= groupname "Opciones gráficas" &= help "Distancia horizontal entre nodos en el gráfico." &= typ "NUM",
+    vSep = 0.5 &= name "vs" &= help "Distancia vertical entre nodos en el gráfico." &= typ "NUM",
+    dpi = 800 &= help "Densidad de resolución del gráfico (no la resolución en sí)." &= typ "NUM",
+    transparentBg = False &= name "tr" &= help "Si se activa se grafica el autómata con fondo transparente."
   }
   &= summary "Autómata Le Pila, (C) Juan Ignacio Farizano."
   &= program "PDA"
-  &= helpArg [help "Muestra esta lista de comandos."]
+  &= helpArg [help "Muestra esta lista de comandos.", name "h"]
   &= details ["Símbolo lambda para tener a mano: λ"]
   &= versionArg [ignore]
+  &= noAtExpand
 
 main :: IO ()
 main = cmdArgs opts >>= go
@@ -65,6 +71,7 @@ repl = do
 data Command = Eval String
              | Verbose
              | PPrintPDA
+             | Graphic FilePath
              | Reload
              | Load FilePath
              | Help
@@ -77,6 +84,7 @@ commands :: [InteractiveCommand]
 commands 
   = [ Cmd [":verbose"] "" (const Verbose) "Togglea el nivel de verbose actual.",
       Cmd [":print"] "" (const PPrintPDA) "Imprime en consola el autómata actual.",
+      Cmd [":graphic"] "" Graphic "Grafica el autómata y lo exporta al archivo dado.",
       Cmd [":reload"] "" (const Reload)  "Recarga el último archivo cargado.",
       Cmd [":load"] "<file>" Load "Carga un autómata desde un archivo.",
       Cmd [":help",":?"] "" (const Help) "Mostrar esta lista de comandos.",
@@ -87,7 +95,7 @@ interpretCommand :: String -> IO Command
 interpretCommand x = 
   if isPrefixOf ":" x 
   then do let (cmd, t') = break isSpace x
-              t = dropWhile isSpace t'
+              (t, _) = span (not . isSpace) (dropWhile isSpace t')
               matching = filter (\(Cmd cs _ _ _) -> any (isPrefixOf cmd) cs) commands
           case matching of
             []  ->  do  putStrLn ("Comando desconocido `" ++ cmd ++ "'. Escriba :? para recibir ayuda.")
@@ -119,6 +127,7 @@ handleCommand cmd = do
         Help       -> printPDA (helpTxt commands) >> return True
         Verbose    -> toggleVerbose >> return True
         PPrintPDA  -> getActualPDA >>= ppPDA >> return True
+        Graphic f  -> graphicPDA f >> return True
         Reload     -> reloadFile >> return True
         Load f     -> loadFile f >> return True
         Eval w     -> checkWord w >> return True

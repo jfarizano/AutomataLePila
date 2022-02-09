@@ -1,4 +1,4 @@
-module Lib where
+module Lib ( verifyPDA ) where
 
 import Lang
 import Monad

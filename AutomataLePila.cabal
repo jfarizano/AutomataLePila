@@ -42,7 +42,9 @@ library
     , base >=4.7 && <5
     , cmdargs
     , exceptions
+    , fgl
     , filepath
+    , graphviz
     , haskeline
     , mtl
     , prettyprinter
@@ -63,7 +65,9 @@ executable AutomataLePila-exe
     , base >=4.7 && <5
     , cmdargs
     , exceptions
+    , fgl
     , filepath
+    , graphviz
     , haskeline
     , mtl
     , prettyprinter
@@ -85,7 +89,9 @@ test-suite AutomataLePila-test
     , base >=4.7 && <5
     , cmdargs
     , exceptions
+    , fgl
     , filepath
+    , graphviz
     , haskeline
     , mtl
     , prettyprinter

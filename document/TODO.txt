@@ -1,8 +1,4 @@
-- ¿Volver a agregar el random y exhaustive?
-- Llorar
-- ¿Graficar solo el autómata o todo el proceso de evaluación?
 - Comentar el código. No seas burro Fari, no comentaste nada (se hablaba solo)
-- Seguir llorando
 - Informe
 - Aprobar el TP
 - Estudiar y aprobar la práctica

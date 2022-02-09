@@ -23,12 +23,6 @@ setVerbose b = modify (\s -> s {verbose = b})
 getVerbose :: MonadPDA m => m Bool
 getVerbose = gets verbose
 
-setGraphic :: MonadPDA m => Bool -> m ()
-setGraphic b = modify (\s -> s {graphic = b})
-
-getGraphic :: MonadPDA m => m Bool
-getGraphic = gets graphic
-
 setActualPDA :: MonadPDA m => Automaton -> m ()
 setActualPDA p = modify (\s -> s {actualPDA = p})
 
@@ -40,6 +34,30 @@ setCanRunPDA b = modify (\s -> s {canRunPDA = b})
 
 getCanRunPDA :: MonadPDA m => m Bool
 getCanRunPDA = gets canRunPDA
+
+gethSep :: MonadPDA m => m Double
+gethSep = gets hSep
+
+sethSep :: MonadPDA m => Double -> m ()
+sethSep h = modify (\s -> s {hSep = h})
+
+getvSep :: MonadPDA m => m Double
+getvSep = gets vSep
+
+setvSep :: MonadPDA m => Double -> m ()
+setvSep v = modify (\s -> s {vSep = v})
+
+getDpi :: MonadPDA m => m Double
+getDpi = gets dpi
+
+setDpi :: MonadPDA m => Double -> m ()
+setDpi d = modify (\s -> s {dpi = d})
+
+getTransparentBg :: MonadPDA m => m Bool
+getTransparentBg = gets transparentBg
+
+setTransparentBg :: MonadPDA m => Bool -> m ()
+setTransparentBg b = modify (\s -> s {transparentBg = b})
 
 printPDA :: MonadPDA m => String -> m ()
 printPDA = liftIO . putStrLn

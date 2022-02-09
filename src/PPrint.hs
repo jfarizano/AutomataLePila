@@ -143,6 +143,23 @@ ppResult :: MonadPDA m => Bool -> m ()
 ppResult True = prettyPrint $ sep [pretty "La palabra fue", cat [annotate (color Green) $ pretty "aceptada", dot]]
 ppResult False = prettyPrint $ sep [pretty "La palabra fue", cat [annotate (color Red) $ pretty "rechazada", dot]]
 
+ppVerboseGraphic :: MonadPDA m => FilePath -> m ()
+ppVerboseGraphic f = do hSep <- gethSep
+                        vSep <- getvSep
+                        dpi <- getDpi
+                        tr <- getTransparentBg
+                        prettyPrint $ sep [verbose2doc "Se guardó el autómata graficado al archivo",
+                                           pretty f,
+                                           pretty "con separación horizontal",
+                                           pretty hSep,
+                                           pretty "separación vertical",
+                                           pretty vSep,
+                                           pretty "DPI",
+                                           pretty dpi,
+                                           pretty "y",
+                                           pretty $ if tr then "con" else "sin",
+                                           pretty "fondo transparente."]
+
 ppErrorStackSy :: MonadPDA m => Symbol -> m ()
 ppErrorStackSy sy = doIfVerbose prettyPrint (sep [sep [verbose2doc "En el alfabeto de pila no se encuentra el caracter",
                                                        stackSymbol2doc sy,
