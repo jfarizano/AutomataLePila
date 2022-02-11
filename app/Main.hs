@@ -90,7 +90,7 @@ commands :: [InteractiveCommand]
 commands 
   = [ Cmd [":verbose"] "" (const Verbose) "Togglea el nivel de verbose actual.",
       Cmd [":print"] "" (const PPrintPDA) "Imprime en consola el autómata actual.",
-      Cmd [":graphic"] "" Graphic "Grafica el autómata y lo exporta al archivo dado.",
+      Cmd [":graphic"] "" Graphic "Grafica el autómata y lo exporta al archivo de salida dado. Los formatos permitidos son .png, .jpeg, .jpg, .pdf, .svg y .dot",
       Cmd [":reload"] "" (const Reload)  "Recarga el último archivo cargado.",
       Cmd [":load"] "<file>" Load "Carga un autómata desde un archivo.",
       Cmd [":help",":?"] "" (const Help) "Mostrar esta lista de comandos.",

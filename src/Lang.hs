@@ -2,7 +2,7 @@
 
 module Lang where
 
-import System.Console.CmdArgs.Implicit
+import System.Console.CmdArgs.Implicit ( Data, Typeable )
 
 -- | Tipos que representan las partes de un autómata y su configuración.
 type Symbol = Char

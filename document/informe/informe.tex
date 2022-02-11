@@ -1,0 +1,291 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish, mexico]{babel}
+\usepackage[spanish]{layout}
+\usepackage[article]{ragged2e}
+\usepackage[pdftex]{graphicx}
+\usepackage{textcomp}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{fancyvrb}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage[pdftex,colorlinks,linkcolor=blue]{hyperref}
+\usepackage[cm]{fullpage}
+
+\lstset{
+  basicstyle=\ttfamily,
+  mathescape
+}
+
+\begin{document}
+
+%-------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+
+\begin{titlepage}
+\thispagestyle{empty}
+\begin{center}
+  \includegraphics[bb=0 0 100 100]{UNR-escudo-1.jpg}
+  \\[0.5cm]
+  \textsc{\LARGE Universidad Nacional de Rosario}\\[1.5cm]
+  
+  % Title
+  {\huge \textbf{Autómata Le Pila} \\[0.4cm]}
+  {\large Diseño e implementación de un DSL para autómatas de pila no deterministas} \\
+  \noindent
+  
+  \vfill
+  \vfill
+  \vfill
+  {\Large Autor: \par}
+  {\Large Juan Ignacio Farizano\par}
+
+  \vfill
+  % Bottom of the page
+  Trabajo Práctico Final \\
+  Análisis de Lenguajes de Programación \\
+  Departamento de Ciencias de la Computaci\'on\\
+  Facultad de Ciencias Exactas, Ingenier\'ia y Agrimensura\\
+  Rosario, Santa Fe, Argentina\\[0.4cm]
+  {\large \today} 
+\end{center}
+\end{titlepage}
+
+%-------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+
+\tableofcontents
+
+\newpage
+
+\section{Motivación}
+Este proyecto nace a partir de las clases de Lenguajes Formales y Computabilidad,
+donde tuvimos nuestro primer acercamiento a estas máquinas reconocedoras de lenguaje.
+
+La idea principal es proveer a les alumnes que estén cursando segundo año una
+herramienta donde puedan testear los autómatas que construyan en la práctica,
+pudiendo ver si ciertas palabras del lenguaje pedido son reconocidas como esperado,
+ver el paso a paso de como la máquina elige la siguiente transición y como cambia
+su configuración en el momento (utilizando el modo \emph{verbose}) además de luego
+poder graficar estos autómatas de forma sencilla.
+
+\section{Decisiones de diseño}
+Durante el tiempo transcurrido entre la primera presentación de la idea para el
+trabajo y su primera versión funcional el lenguaje pasó por muchos cambios.
+
+Al principio se iba permitir cargar en memorias varios autómatas y modificarlos
+en tiempo real desde la consola, pero esto se mostró muy complejo además de 
+innecesario ya que en casos de uso reales se estaría probando solo un autómata
+a la vez, por lo que se optó cargar uno solo a la vez y desde un archivo para
+mantener la consola interactiva lo maś sencilla y fácil de utilizar posible.
+
+Otras ideas eran por ejemplo tener diferentes órdenes de evaluación, ya sea
+que en cada paso se elija una transición aleatoria entre todas las disponibles o
+recorrerlas a todas para ver por cuantos caminos se puedan reconocer una palabra,
+pero de nuevamente complejizaba el código, no eran características indispensables
+y podían traer problemas en la ejecución como caer en loops infinitos con 
+mayor facilidad.
+
+En la versión final del programa se carga un autómata desde un archivo y a
+través de una consola interactiva se permite cargar archivos nuevos, recargar
+el último archivo utilizado, imprimir en consola el autómata, graficarlo el mismo
+con salida a un archivo y reconocer palabras. También se cuenta con un modo verbose
+que hace que en cada comando pedido por consola se imprima información extra
+al respecto, por ejemplo en la evaluación se imprime cada paso y decisión tomada
+o en el proceso de graficar imprime los parámetros utilizados.
+
+\newpage
+
+\section{Lenguaje}
+
+Defino la sintaxis concreta del DSL a partir de la siguiente gramática, donde
+el autómata se lee a partir de la regla de producción \textcolor{blue}{PDA} 
+(\textcolor{blue}{P}ush\textcolor{blue}{D}own \textcolor{blue}{A}utomaton),
+y a partir de ella se leen todas las partes que lo componen.
+
+\subsection{Sintáxis concreta}
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\textcolor{blue}{PDA} ::= InputAlph '=' \textcolor{blue}{ALPH}';'
+        StackAlph '=' \textcolor{blue}{ALPH}';'
+        States '=' \textcolor{blue}{STATES}';'
+        AccStates '=' \textcolor{blue}{STATES}';'
+        Transitions '=' \textcolor{blue}{TRANSITIONS}';'
+
+\textcolor{blue}{ALPH} ::= '\{' \textcolor{blue}{SYMBOLS} '\}' | '\{' '\}'
+
+\textcolor{blue}{SYMBOLS} ::= \textcolor{blue}{SYMBOL} | \textcolor{blue}{SYMBOL}',' \textcolor{blue}{SYMBOLS}
+
+\textcolor{blue}{STATES} ::= '\{' \textcolor{blue}{STATES'} '\}' | '\{' '\}'
+
+\textcolor{blue}{STATES'} ::= \textcolor{blue}{STATE} | \textcolor{blue}{STATE}',' \textcolor{blue}{STS}
+
+\textcolor{blue}{TRANSITIONS} ::= '\{' \textcolor{blue}{TRANSITIONS'} '\}' | '\{' '\}'
+
+\textcolor{blue}{TRANSITIONS'} ::=  \textcolor{blue}{TRANSITION} | \textcolor{blue}{TRANSITION}',' \textcolor{blue}{TRANSITIONS'}
+
+\textcolor{blue}{TRANSITION} ::= '('\textcolor{blue}{STATE}',' \textcolor{blue}{SYMBOL}',' \textcolor{blue}{SYMBOL}',' \textcolor{blue}{SYMBOL}',' \textcolor{blue}{STATE}')'
+\end{Verbatim}
+
+\subsection*{Notas extras de la sintaxis}
+La regla de producción \textcolor{blue}{SYMBOL} es análoga a leer chars individuales,
+solo que no se permiten ciertos caracteres reservados, como los espacios, los caracteres
+de control y los caracteres reservados '\textcolor{red}{=}', '\textcolor{red}{,}', '\textcolor{red}{;}',
+'\textcolor{red}{(}', '\textcolor{red}{)}', '\textcolor{red}{\{}', '\textcolor{red}{\}}'.
+
+La regla de producción \textcolor{blue}{STATE} es análoga a leer un string pero solo
+con los caracteres permitidos en \textcolor{blue}{SYMBOL}.
+
+\subsection{Notación}
+Para definir un autómata, se lo debe escribir en un archivo con extensión \textbf{.pda}
+donde dentro se lo define siguiendo la gramática dada anteriormente, como
+se puede ver en el siguiente ejemplo:
+
+\begin{lstlisting}
+InputAlph = {x, y};
+StackAlph = {x, y, #};
+States = {s0, s1, s2, s3};
+AccStates = {s0, s3};
+Transitions = {(s0, $\lambda$, $\lambda$, #, s1), (s1, x, $\lambda$, x, s1), (s1, y, x, $\lambda$, s2),
+(s2, y, x, $\lambda$, s2), (s2, $\lambda$, #, $\lambda$, s3)}
+\end{lstlisting}
+
+
+En este autómata podemos ver que en cada línea se define:
+\begin{itemize}
+  \item El alfabeto de entrada compuesto por x e y.
+  \item El alfabeto de pila compuesto por x, y el símbolo \#.
+  \item Los estados s0, s1, s2 y s3.
+  \item Los estados de aceptación s0 y s3.
+  \item Las transiciones.
+\end{itemize}
+
+Para el estado inicial se utiliza el primer estado definido.
+
+Las transiciones son tuplas compuestas por estado actual, símbolo a leer de la entrada,
+símbolo que se extrae de la pila, símbolo que se inserta a la pila y el estado siguiente. \\
+
+
+\textbf{Nota:} El símbolo $\lambda$ no es necesario incluirlo en los lenguajes de entrada y pila,
+ya que está incluido por defecto.
+
+\newpage
+
+\section{Resolución}
+\subsection{Parseo}
+Para el parser se utilizó la herramienta Happy, un generador de parsers para Haskell,
+que definiendo una gramática en Yacc y un lexer en Haskell te genera un archivo Haskell
+con el parser. Este código se puede encontrar en el archivo \textbf{src/Parse.y}
+
+\subsection{Uso de las mónadas}
+En el archivo \textbf{src/Monad.hs} se encuentra definida la mónada \emph{MonadPDA}
+que se utiliza en todo el programa, esta está basada en la mónada del compilador
+de la materia Compiladores y me permite realizar operaciones de entrada/salida,
+manejo de errores y llevar un estado global con todos los datos necesarios
+para la ejecución.
+
+\subsection{Evaluación}
+El evaluador de autómatas se encuentra en el archivo \textbf{src/Eval.hs},
+allí se exporta la función evaluadora \emph{evalPDA} que recibe un autómata y una palabra 
+a reconocer, esta a su vez hace uso de la función \emph{evalPDA'} a la que le pasa
+los argumentos anteriores más la configuración inicial de la máquina que es
+con el estado inicial y la pila vacía.
+La evaluación si se atasca en algún paso realiza backtracking, lo que permite
+evaluar autómatas de naturaleza no determinista.
+
+\subsection{Otros archivos}
+\begin{itemize}
+  \item En el archivo \textbf{src/Lang.hs} se encuentran las estructuras de datos
+  utilizadas para representar a un autómata de pila, sus partes y una configuración del mismo.
+  \item En el archivo \textbf{src/Global.hs} se encuentra la estructura de datos
+  utilizada para llevar el estado global del sistema y todos sus datos.
+  \item En el archivo \textbf{src/Lib.hs} se encuentra funciones utilizadas en
+  el resto del programa, en este caso solo se exporta una función utilizada para verificar
+  que un autómata dado sea válido y cumpla con su estructura y condiciones requeridas.
+  \item En el archivo \textbf{src/PPrint.hs} se encuentran las funciones utilizadas
+  para imprimir en consola de forma más clara y fácil de leer las diferentes estructuras
+  utilizadas, mensajes de errores, mensajes que solo se imprimen con modo verbose, etc.
+  \item En el archivo \textbf{src/Graphic.hs} se encuentran las funciones utilizadas
+  para graficar un autómata y exportarlo a un archivo de salida.
+  \item El archivo \textbf{app/Main.hs} es el archivo principal del programa,
+  en él se realiza el loop interactivo con la consola con todo la interpretación
+  y evaluación de comandos que se tienen que realizar en ella.
+\end{itemize}
+
+\newpage
+
+\section{Instalación y uso}
+\subsection{Requisitos}
+Para poder usar el programa es necesario tener instalada la plataforma de Haskell
+junto a Stack. 
+
+Para poder graficar autómatas es necesario tener instalado el 
+paquete \emph{graphviz}, en caso contrario este comando nunca se ejecutará.
+
+\subsection{Instalación}
+\begin{enumerate}
+  \item Clonar el repositorio con el comando:
+    \begin{verbatim}
+      git clone https://github.com/jfarizano/AutomataLePila.git
+    \end{verbatim}
+  \item Moverse a la carpeta del programa creada por el comando anterior y compilar con el comando:
+    \begin{verbatim}
+      stack build
+    \end{verbatim}
+\end{enumerate}
+Con esto ya tenemos el programa instalado y está listo para su uso.
+
+\subsection{Manual de uso}
+Para ejecutar el programa utilizamos los comandos:
+\begin{verbatim}
+  stack run
+  stack run -- [FLAGS] [FILE]
+\end{verbatim}
+Donde el primero ejecutará el programa sin cargar ningún autómata ni 
+recibirá flags, en este caso se podrá usar la consola pero solo se permitirá
+cargar archivos o usar la ayuda hasta que se use el comando de cargar archivos y
+se lea un autómata válido. A partir de este punto se puede utilizar los comandos restantes.
+
+En la segunda opción se le puede dar un archivo de entrada directamente al programa
+para que este lo lea directamente sin tener que darlo en la consola interactiva, 
+además de poder darle flags para cambiar parámetros de su ejecución y del comando de graficar.
+
+Las acciones y opciones de estas flags se pueden ver con el comando
+\begin{verbatim}
+  stack run -- -h
+\end{verbatim}
+
+Una vez dentro del loop de la consola interactiva y con un autómata válido cargado 
+podemos realizar diferentes comandos, entre ellos imprimir una pantalla de ayuda,
+activar o desactivar el modo verbose, cargar o recargar un archivo,
+imprimir en consola el autómata cargado o graficar y exportar el mismo. La ayuda
+de estos comandos se puede ver escribiendo el comando '\textbf{:h}' en consola.
+
+\newpage
+
+\section{Bibliografía, material utilizado y software de terceros.}
+\begin{itemize}
+  \item \href{https://dcc.fceia.unr.edu.ar/es/lcc/r213}
+             {Diapositivas de clase de la materia Lenguajes Formales y Computabilidad por Pablo Verdes.}
+  \item \href{https://github.com/damianarielm/lcc/blob/master/2%20Ano/Lenguajes%20Formales%20y%20Computabilidad/Lenguajes%20Formales.pdf}
+             {Apunte de Lenguajes Formales y Computabilidad por Damián Ariel Marotte}
+  \item \href{https://github.com/compiladores-lcc/compiladores2021/blob/main/src/MonadFD4.hs}
+             {Mónada basada en la mónada del compilador de la materia Compiladores dada por Mauro Jaskelioff.}
+  \item \href{https://www.haskell.org/happy/}
+             {Generador de parsers Happy.}
+  \item \href{https://hackage.haskell.org/package/cmdargs}
+             {Librería CmdArgs para parseo de argumentos en consola del sistema.}
+  \item \href{https://hackage.haskell.org/package/haskeline}
+             {Librería Haskeline para entrada en la consola interactiva del programa.}
+  \item \href{https://hackage.haskell.org/package/prettyprinter}
+             {Librería PrettyPrinter para imprimir en consola de forma clara.}
+  \item \href{https://hackage.haskell.org/package/graphviz}
+             {Librería GraphViz utilizada para poder usar el programa de gráficos de mismo nombre dentro de Haskell.}
+  \item \href{https://hackage.haskell.org/package/fgl-5.7.0.3}
+             {Librería FGL utilizada para una representación intermedia de los autómatas como grafos en la librería anterior.}
+\end{itemize}
+
+\end{document}
