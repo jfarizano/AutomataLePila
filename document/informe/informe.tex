@@ -258,11 +258,47 @@ Las acciones y opciones de estas flags se pueden ver con el comando
   stack run -- -h
 \end{verbatim}
 
+Dónde se pueden ver las siguientes opciones:
+
+\begin{itemize}
+  \item \textbf{--verbose} activa el modo verbose, haciendo que en consola se imprima más
+  información relevante a la ejecución, por ejemplo en la evaluación de un autómata
+  se imprimen todas las transiciones y configuraciones posibles por las que se puede
+  seguir en cada paso.
+  \item \textbf{--hs} o \textbf{--hsep} recibe un número como argumento, de esta forma se puede cambiar
+  la distancia horizontal entre nodos en el gráfico resultante del comando de graficar.
+  Se recomienda dar una distancia de 2 o mayor cuando el autómata contiene muchos nodos
+  o uno donde tiene muchas transiciones que loopean en el mismo estado.
+  \item \textbf{--vs} o \textbf{--vsep} análoga a la flag anterior pero de distancia vertical entre todos.
+  \item \textbf{--dpi} recibe un número como argumento y esta será la densidad de pixeles
+  de la resolución, no la resolución en sí.
+  \item \textbf{-t}, \textbf{--tr} o \textbf{--transparentbg} si se activa esta flag cuando se grafique un
+  autómata el gráfico resultante saldrá con fondo transparente.
+  \item \textbf{--h}, \textbf{-?} o \textbf{--help} muestra la lista de opciones dadas aquí también.
+\end{itemize}
+
 Una vez dentro del loop de la consola interactiva y con un autómata válido cargado 
 podemos realizar diferentes comandos, entre ellos imprimir una pantalla de ayuda,
 activar o desactivar el modo verbose, cargar o recargar un archivo,
 imprimir en consola el autómata cargado o graficar y exportar el mismo. La ayuda
 de estos comandos se puede ver escribiendo el comando '\textbf{:h}' en consola.
+
+Los comandos disponibles son los siguientes:
+
+\begin{itemize}
+  \item \textbf{:verbose} o \textbf{:v} activa el modo verbose si estaba desactivado y viceversa.
+  \item \textbf{:print} o \textbf{:p} imprime en consola el autómata cargado actualmente.
+  \item \textbf{:graphic} o \textbf{:g} recibe un archivo como argumento y exporta un gráfico del autómata
+  cargado a ese archivo.
+  \item \textbf{:load} o \textbf{:l} recibe un archivo con un autómata y lo carga en memoria.
+  \item \textbf{:reload} o \textbf{:r} recarga el último archivo cargado.
+  \item \textbf{:help}, \textbf{:h} o \textbf{:?} muestra la lista de comandos.
+  \item \textbf{:quit} o \textbf{:q} sale del programa.
+\end{itemize}
+
+Si no hay un autómata cargado los únicos comandos que se podran usar serán los de
+cargar un archivo, recargar el último archivo dado (en caso de que este haya sido inválido),
+mostrar la pantalla de ayuda, activar y desactivar verbose, o salir del programa.
 
 \newpage
 
