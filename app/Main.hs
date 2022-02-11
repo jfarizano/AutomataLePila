@@ -36,7 +36,7 @@ opts = Env {
   }
   &= summary "Autómata Le Pila, (C) Juan Ignacio Farizano."
   &= program "PDA"
-  &= helpArg [help "Muestra esta lista de comandos.", name "h"]
+  &= helpArg [help "Muestra esta lista de opciones.", name "h"]
   &= details ["Símbolo lambda para tener a mano: λ"]
   &= versionArg [ignore]
   &= noAtExpand
@@ -91,8 +91,8 @@ commands
   = [ Cmd [":verbose"] "" (const Verbose) "Togglea el nivel de verbose actual.",
       Cmd [":print"] "" (const PPrintPDA) "Imprime en consola el autómata actual.",
       Cmd [":graphic"] "" Graphic "Grafica el autómata y lo exporta al archivo de salida dado. Los formatos permitidos son .png, .jpeg, .jpg, .pdf, .svg y .dot",
-      Cmd [":reload"] "" (const Reload)  "Recarga el último archivo cargado.",
       Cmd [":load"] "<file>" Load "Carga un autómata desde un archivo.",
+      Cmd [":reload"] "" (const Reload)  "Recarga el último archivo cargado.",
       Cmd [":help",":?"] "" (const Help) "Mostrar esta lista de comandos.",
       Cmd [":quit"] "" (const Quit) "Salir del programa."
     ]
@@ -125,8 +125,8 @@ handleCommand cmd = do
         Noop    -> return True
         Help    -> printPDA (helpTxt commands) >> return True
         Verbose -> toggleVerbose >> return True
-        Reload  -> reloadFile >> return True
         Load f  -> loadFile f >> return True
+        Reload  -> reloadFile >> return True
         _       -> do ppError $ "No se encuentra un autómata válido cargado."
                       return True 
   else case cmd of
@@ -136,8 +136,8 @@ handleCommand cmd = do
         Verbose    -> toggleVerbose >> return True
         PPrintPDA  -> getActualPDA >>= ppPDA >> return True
         Graphic f  -> graphicPDA f >> return True
-        Reload     -> reloadFile >> return True
         Load f     -> loadFile f >> return True
+        Reload     -> reloadFile >> return True
         Eval w     -> checkWord w >> return True
 
 -- | Función que devuelve el texto a imprimir por el comando de ayuda.
