@@ -71,6 +71,9 @@ catchPDA :: MonadPDA m => m a -> m (Maybe a)
 catchPDA c = catchError (Just <$> c) 
                         (\e -> liftIO $ putStrLn ("\ESC[31m" ++ "[ERROR] " ++ "\ESC[0m" ++ e) >> return Nothing)
 
+-- Función utilizada principalmente para realizar una computación solamente
+-- cuando se encuentra el modo verbose activado, por ej una función de pretty
+-- printing con un argumento dado.
 doIfVerbose :: MonadPDA m => (a -> m ()) -> a -> m ()
 doIfVerbose f a = do v <- getVerbose
                      if v then f a

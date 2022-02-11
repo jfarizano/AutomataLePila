@@ -17,8 +17,9 @@
 *.jpg
 *.jpeg
 *.pdf
-!document/informe.pdf
+!document/informe/informe.pdf
 *.txt
+*.toc
 !document/*.txt
 *.dot
 *.svg

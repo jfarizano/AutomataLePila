@@ -32,7 +32,7 @@ graphicPDA f = do b <- liftIO $ isGraphvizInstalled
                                               ppVerboseGraphic f
                                               ppOpDone "El archivo fue guardado."
                                               return ()                                              
-                  else failPDA "Paquete GraphViz no instalado."
+                  else failPDA "Paquete GraphViz no instalado en el sistema."
 
 
 -- | Convierte el autómata dado al tipo DotGraph usado por la librería.
